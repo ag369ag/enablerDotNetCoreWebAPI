@@ -1,0 +1,12 @@
+@testASPWebAPI_HostAddress = http://localhost:5084
+
+GET {{testASPWebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+
+
+###
+
+GET {{testASPWebAPI_HostAddress}}/getPumpsDetails/
+Accept: application/json
+###
