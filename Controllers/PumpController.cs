@@ -38,8 +38,8 @@ namespace testASPWebAPI.Controllers
             }
         }
 
-       
-        [Route("[action]")]
+
+        /*[Route("[action]")]
         [HttpGet(Name = "Getting pump data")]
         public JsonResult GetPumpData()
         {
@@ -76,10 +76,65 @@ namespace testASPWebAPI.Controllers
                 }
             }
             return new JsonResult(pumpList);
-        }
+        }*/
 
         [Route("[action]")]
-        [HttpPost(Name = "GetTransactionInfo")]
+        [HttpGet(Name = "Getting pump data")]
+        public JsonResult getTransactionByPumpID(JsonDocument json)
+        {
+            while (!fore.IsConnected)
+            {
+            }
+
+            int pumpID = json.RootElement.GetProperty("pumpID").GetInt32();
+            List<TransactionClass> pumpTransactions = new List<TransactionClass>();
+
+            try
+            {
+                Pump selectedPump = fore.Pumps[pumpID];
+
+                if (selectedPump.TransactionStack.Count > 0)
+                {
+                    foreach (Transaction trans in selectedPump.TransactionStack)
+                    {
+                        if (trans.IsLocked)
+                        {
+                            continue;
+                        }
+
+                        pumpTransactions.Add(new TransactionClass
+                        {
+                            deliveryID = trans.DeliveryData.DeliveryID,
+                            deliveryGrade = trans.DeliveryData.Grade.ToString(),
+                            deliveryUnitPrice = trans.DeliveryData.UnitPrice,
+                            deliveryQuantity = trans.DeliveryData.Quantity,
+                            deliveryAmount = trans.DeliveryData.Money
+                            // deliveryLockStatus = trans.IsLocked
+                        });
+                    }
+                }
+
+                PumpClass pumpData = new PumpClass
+                {
+                    pumpName = selectedPump.Name,
+                    pumpNumber = pumpID,
+                    pumpStack = selectedPump.TransactionStack.Count,
+                    transactions = pumpTransactions
+                };
+
+
+                return new JsonResult(new { status = "Success", data = pumpData });
+            }
+            catch (Exception ex)
+            {
+                JsonResult result = new JsonResult(new { status = "Failed", data = ex.Message });
+                result.StatusCode = 500;
+                return result;
+            }            
+        }
+
+        /*[Route("[action]")]
+        [HttpPost(Name = "GetTransactionInfo")]*/
         public JsonResult GetTransactionInfo(JsonDocument json)
         {
             while (!fore.IsConnected)
@@ -103,8 +158,8 @@ namespace testASPWebAPI.Controllers
                     deliveryGrade = equivalentTransaction.DeliveryData.Grade.ToString(),
                     deliveryUnitPrice = equivalentTransaction.DeliveryData.UnitPrice,
                     deliveryQuantity = equivalentTransaction.DeliveryData.Quantity,
-                    deliveryAmount = equivalentTransaction.DeliveryData.Money,
-                    deliveryLockStatus = equivalentTransaction.IsLocked
+                    deliveryAmount = equivalentTransaction.DeliveryData.Money
+                   // deliveryLockStatus = equivalentTransaction.IsLocked
                 };
 
                 return new JsonResult(new { Status = "Success", Pumpid = pumpID, DeliveryID = deliveryID, SelectedTransaction = selectedTransaction });
@@ -122,8 +177,8 @@ namespace testASPWebAPI.Controllers
 
 
 
-        [Route("[action]")]
-        [HttpPost(Name = "VoidTransaction")]
+        /*[Route("[action]")]
+        [HttpPost(Name = "VoidTransaction")]*/
         public JsonResult VoidTransaction(JsonDocument json)
         {
             while (!fore.IsConnected)
@@ -167,8 +222,8 @@ namespace testASPWebAPI.Controllers
                     deliveryGrade = equivalentTransaction.DeliveryData.Grade.ToString(),
                     deliveryUnitPrice = equivalentTransaction.DeliveryData.UnitPrice,
                     deliveryQuantity = equivalentTransaction.DeliveryData.Quantity,
-                    deliveryAmount = equivalentTransaction.DeliveryData.Money,
-                    deliveryLockStatus = equivalentTransaction.IsLocked
+                    deliveryAmount = equivalentTransaction.DeliveryData.Money
+                    //deliveryLockStatus = equivalentTransaction.IsLocked
                 };
 
                 return new JsonResult(new { Status = "Success", Pumpid = pumpID, DeliveryID = deliveryID, SelectedTransaction = selectedTransaction });
@@ -257,8 +312,8 @@ namespace testASPWebAPI.Controllers
 
 
 
-        [Route("[action]")]
-        [HttpPost(Name = "ClearTransaction")]
+        /*[Route("[action]")]
+        [HttpPost(Name = "ClearTransaction")]*/
         public JsonResult ClearTransaction(JsonDocument json)
         {
             while (!fore.IsConnected)
@@ -301,8 +356,8 @@ namespace testASPWebAPI.Controllers
                     deliveryGrade = equivalentTransaction.DeliveryData.Grade.ToString(),
                     deliveryUnitPrice = equivalentTransaction.DeliveryData.UnitPrice,
                     deliveryQuantity = equivalentTransaction.DeliveryData.Quantity,
-                    deliveryAmount = equivalentTransaction.DeliveryData.Money,
-                    deliveryLockStatus = equivalentTransaction.IsLocked
+                    deliveryAmount = equivalentTransaction.DeliveryData.Money
+                    //deliveryLockStatus = equivalentTransaction.IsLocked
                 };
                 return new JsonResult(new { Status = "Success", Pumpid = pumpID, DeliveryID = deliveryID, SelectedTransaction = selectedTransaction });
             }
