@@ -1,9 +1,11 @@
 ﻿using IniParser;
 using IniParser.Model;
 using ITL.Enabler.API;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Registration;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
@@ -13,6 +15,8 @@ namespace testASPWebAPI.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [Authorize]
+
     public class PumpController : ControllerBase
     {
         private Forecourt fore = PumpClass.forecourt;
@@ -23,6 +27,7 @@ namespace testASPWebAPI.Controllers
         private int pumpStart;
         private int pumpEnd;
 
+        
         public PumpController()
         {
             var configParser = new FileIniDataParser();
@@ -36,23 +41,36 @@ namespace testASPWebAPI.Controllers
             {
                 fore.Connect(server, terminalID, "", password, true);
             }
+
+            
         }
 
 
-        /*[Route("[action]")]
+        [Route("[action]")]
         [HttpGet(Name = "Getting pump data")]
         public JsonResult GetPumpData()
         {
-            while (!fore.IsConnected)
+            /* while (!fore.IsConnected)
+             {
+             }*/
+
+            if (!IsRegistered())
             {
+                return new JsonResult(new { Message = "API is not yet registered" });
             }
-            
+
+            if (!isForecourtConnected())
+            {
+                isForecourtConnected();
+            }
+
             List<PumpClass> pumpList = new List<PumpClass>();
             foreach (Pump item in fore.Pumps)
             {
                 List<TransactionClass> transList = new List<TransactionClass>();
                 foreach (Transaction trans in item.TransactionStack)
                 {
+
                     transList.Add(new TransactionClass
                     {
                         deliveryID = trans.DeliveryData.DeliveryID,
@@ -63,9 +81,24 @@ namespace testASPWebAPI.Controllers
                         deliveryLockStatus = trans.IsLocked
                     });
                 }
-
-                if(pumpStart <= item.Number && pumpEnd >= item.Number)
+                if(item.CurrentTransaction != null)
                 {
+                    
+                        transList.Add(new TransactionClass
+                        {
+                            deliveryID = item.CurrentTransaction.DeliveryData.DeliveryID,
+                            deliveryGrade = item.CurrentTransaction.DeliveryData.Grade.ToString(),
+                            deliveryUnitPrice = item.CurrentTransaction.DeliveryData.UnitPrice,
+                            deliveryQuantity = item.CurrentTransaction.DeliveryData.Quantity,
+                            deliveryAmount = item.CurrentTransaction.DeliveryData.Money,
+                            deliveryLockStatus = item.CurrentTransaction.IsLocked
+                        });
+                    
+                    
+                }
+
+                /*if (pumpStart <= item.Number && pumpEnd >= item.Number)
+                {*/
                     pumpList.Add(new PumpClass
                     {
                         pumpName = item.Name,
@@ -73,22 +106,35 @@ namespace testASPWebAPI.Controllers
                         pumpStack = item.TransactionStack.Count,
                         transactions = transList
                     });
-                }
+                //}
             }
+            
+            SaveQueryLog($"Get all pump data.\nResult: {Newtonsoft.Json.JsonConvert.SerializeObject(pumpList)}");
             return new JsonResult(pumpList);
-        }*/
+        }
 
         [Route("[action]")]
-        [HttpGet(Name = "Getting pump data")]
+        [HttpPost]
         public JsonResult getTransactionByPumpID(JsonDocument json)
         {
-            while (!fore.IsConnected)
+            /*while (!fore.IsConnected)
             {
+
+            }*/
+
+            if (!IsRegistered())
+            {
+                return new JsonResult(new { Message = "API is not yet registered" });
+            }
+
+            if (!isForecourtConnected())
+            {
+                isForecourtConnected();
             }
 
             int pumpID = json.RootElement.GetProperty("pumpID").GetInt32();
             List<TransactionClass> pumpTransactions = new List<TransactionClass>();
-
+            
             try
             {
                 Pump selectedPump = fore.Pumps[pumpID];
@@ -108,10 +154,27 @@ namespace testASPWebAPI.Controllers
                             deliveryGrade = trans.DeliveryData.Grade.ToString(),
                             deliveryUnitPrice = trans.DeliveryData.UnitPrice,
                             deliveryQuantity = trans.DeliveryData.Quantity,
-                            deliveryAmount = trans.DeliveryData.Money
-                            // deliveryLockStatus = trans.IsLocked
+                            deliveryAmount = trans.DeliveryData.Money,
+                            deliveryLockStatus = trans.IsLocked
                         });
                     }
+                }
+
+                if(selectedPump.CurrentTransaction != null)
+                {
+                    if(!selectedPump.CurrentTransaction.IsLocked)
+                    {
+                        pumpTransactions.Add(new TransactionClass
+                        {
+                            deliveryID = selectedPump.CurrentTransaction.DeliveryData.DeliveryID,
+                            deliveryGrade = selectedPump.CurrentTransaction.DeliveryData.Grade.ToString(),
+                            deliveryUnitPrice = selectedPump.CurrentTransaction.DeliveryData.UnitPrice,
+                            deliveryQuantity = selectedPump.CurrentTransaction.DeliveryData.Quantity,
+                            deliveryAmount = selectedPump.CurrentTransaction.DeliveryData.Money,
+                            deliveryLockStatus = selectedPump.CurrentTransaction.IsLocked
+                        });
+                    }
+                   
                 }
 
                 PumpClass pumpData = new PumpClass
@@ -122,21 +185,31 @@ namespace testASPWebAPI.Controllers
                     transactions = pumpTransactions
                 };
 
+                JsonResult response = new JsonResult(new { status = "Success", data = pumpData });
+                SaveQueryLog($"Get transaction by pump {pumpID}\n Result: Success, Data: {Newtonsoft.Json.JsonConvert.SerializeObject(pumpData)}");
 
-                return new JsonResult(new { status = "Success", data = pumpData });
+                return response;
             }
             catch (Exception ex)
             {
                 JsonResult result = new JsonResult(new { status = "Failed", data = ex.Message });
+                SaveQueryLog($"Get transaction by pump {pumpID}\n Result: Failed, Data: {ex.Message}");
                 result.StatusCode = 500;
                 return result;
             }            
         }
 
-        /*[Route("[action]")]
-        [HttpPost(Name = "GetTransactionInfo")]*/
+        
+
+        [Route("[action]")]
+        [HttpPost(Name = "GetTransactionInfo")]
         public JsonResult GetTransactionInfo(JsonDocument json)
         {
+            if (!IsRegistered())
+            {
+                return new JsonResult(new { Message = "API is not yet registered" });
+            }
+
             while (!fore.IsConnected)
             {
             }
@@ -147,8 +220,8 @@ namespace testASPWebAPI.Controllers
 
             Pump selectedPump = fore.Pumps[pumpID];
             TransactionClass selectedTransaction;
-            Transaction equivalentTransaction;
-            selectedPump.TransactionStack.TryGetValue(deliveryID, out equivalentTransaction);
+            Transaction equivalentTransaction = getTransactionByID(pumpID, deliveryID);
+            //selectedPump.TransactionStack.TryGetValue(deliveryID, out equivalentTransaction);
 
             if (equivalentTransaction != null)
             {
@@ -158,16 +231,19 @@ namespace testASPWebAPI.Controllers
                     deliveryGrade = equivalentTransaction.DeliveryData.Grade.ToString(),
                     deliveryUnitPrice = equivalentTransaction.DeliveryData.UnitPrice,
                     deliveryQuantity = equivalentTransaction.DeliveryData.Quantity,
-                    deliveryAmount = equivalentTransaction.DeliveryData.Money
-                   // deliveryLockStatus = equivalentTransaction.IsLocked
+                    deliveryAmount = equivalentTransaction.DeliveryData.Money,
+                    deliveryLockStatus = equivalentTransaction.IsLocked
                 };
+                JsonResult result = new JsonResult(new { Status = "Success", Pumpid = pumpID, DeliveryID = deliveryID, SelectedTransaction = selectedTransaction });
 
-                return new JsonResult(new { Status = "Success", Pumpid = pumpID, DeliveryID = deliveryID, SelectedTransaction = selectedTransaction });
+                SaveQueryLog($"Get transaction info from pump {pumpID} with deliveryID {deliveryID}\n Result: Success, Data: {Newtonsoft.Json.JsonConvert.SerializeObject(selectedTransaction)}");
+                return result;
             }
 
             else
             {
                 JsonResult response = new JsonResult(new { Status = "Failed", Message = "No such transaction exist." });
+                SaveQueryLog($"Get transaction info from pump {pumpID} with deliveryID {deliveryID}\n Result: Failed. Message: No such transaction exist.");
                 response.StatusCode = 500;
                 return response;
             }
@@ -177,12 +253,22 @@ namespace testASPWebAPI.Controllers
 
 
 
-        /*[Route("[action]")]
-        [HttpPost(Name = "VoidTransaction")]*/
+        [Route("[action]")]
+        [HttpPost(Name = "VoidTransaction")]
         public JsonResult VoidTransaction(JsonDocument json)
         {
-            while (!fore.IsConnected)
+            /*while (!fore.IsConnected)
             {
+            }*/
+
+            if (!IsRegistered())
+            {
+                return new JsonResult(new { Message = "API is not yet registered" });
+            }
+
+            if (!isForecourtConnected())
+            {
+                isForecourtConnected();
             }
 
             int pumpID = json.RootElement.GetProperty("pumpID").GetInt32();
@@ -191,8 +277,13 @@ namespace testASPWebAPI.Controllers
 
             Pump selectedPump = fore.Pumps[pumpID];
             TransactionClass selectedTransaction;
-            Transaction equivalentTransaction;
-            selectedPump.TransactionStack.TryGetValue(deliveryID, out equivalentTransaction);
+            Transaction equivalentTransaction = getTransactionByID(pumpID, deliveryID);
+            //Transaction equivalentTransaction;
+            //selectedPump.TransactionStack.TryGetValue(deliveryID, out equivalentTransaction);
+            
+              
+            
+
             bool result = false;
             string message = "";
             try
@@ -222,30 +313,65 @@ namespace testASPWebAPI.Controllers
                     deliveryGrade = equivalentTransaction.DeliveryData.Grade.ToString(),
                     deliveryUnitPrice = equivalentTransaction.DeliveryData.UnitPrice,
                     deliveryQuantity = equivalentTransaction.DeliveryData.Quantity,
-                    deliveryAmount = equivalentTransaction.DeliveryData.Money
-                    //deliveryLockStatus = equivalentTransaction.IsLocked
+                    deliveryAmount = equivalentTransaction.DeliveryData.Money,
+                    deliveryLockStatus = equivalentTransaction.IsLocked
                 };
-
-                return new JsonResult(new { Status = "Success", Pumpid = pumpID, DeliveryID = deliveryID, SelectedTransaction = selectedTransaction });
+                JsonResult response = new JsonResult(new { Status = "Success", Pumpid = pumpID, DeliveryID = deliveryID, SelectedTransaction = selectedTransaction });
+                SaveQueryLog($"Void transaction from pump {pumpID} with deliveryID {deliveryID}\nResult: {Newtonsoft.Json.JsonConvert.SerializeObject(selectedTransaction)}");
+                return response;
             }
             else
             {
                 JsonResult response = new JsonResult(new { Status = "Failed", Message = message ?? "Error voiding transaction" });
+                SaveQueryLog($"Void transaction from pump {pumpID} with deliveryID {deliveryID}\nResult: Failed. Message: {message ?? "Error voiding transaction"}");
                 response.StatusCode = 500;
                 return response;
             }
             
         }
 
+        private Transaction getTransactionByID(int pumpID, int deliveryID)
+        {
+            Pump selectedPump = fore.Pumps[pumpID];
+
+            if (selectedPump.CurrentTransaction.DeliveryData.DeliveryID == deliveryID)
+            {
+                return selectedPump.CurrentTransaction;
+            }
+            else
+            {
+                Transaction eqivalentTrans = null;
+                foreach (Transaction trans in selectedPump.TransactionStack)
+                {
+                    if(!(trans.DeliveryData.DeliveryID == deliveryID))
+                    {
+                        continue;
+                    }
+                     eqivalentTrans = trans;
+                }
+                if(eqivalentTrans != null)
+                {
+                    return eqivalentTrans;
+                }
+                return null;
+
+            }
+
+        }
 
 
         [Route("[action]")]
-        [HttpPost(Name = "LockTransaction")]
+        [HttpPost]
         public JsonResult LockTransaction(JsonDocument json)
         {
-
-            while (!fore.IsConnected)
+            if (!IsRegistered())
             {
+                return new JsonResult(new { Message = "API is not yet registered" });
+            }
+
+            if (!isForecourtConnected())
+            {
+                isForecourtConnected();
             }
 
             int pumpID = json.RootElement.GetProperty("pumpID").GetInt32();
@@ -253,8 +379,12 @@ namespace testASPWebAPI.Controllers
 
             Pump selectedPump = fore.Pumps[pumpID];
 
-            Transaction equivalentTransaction;
-            selectedPump.TransactionStack.TryGetValue(deliveryID, out equivalentTransaction);
+            Transaction equivalentTransaction = getTransactionByID(pumpID, deliveryID);
+            //Transaction equivalentTransaction;
+           
+            //selectedPump.TransactionStack.TryGetValue(deliveryID, out equivalentTransaction);
+            
+           
 
             bool result = false;
             string message = "";
@@ -276,6 +406,7 @@ namespace testASPWebAPI.Controllers
                     catch (EnablerException e)
                     {
                         result = false;
+                        message = e.Message;
                     }
                 }
             }
@@ -286,9 +417,13 @@ namespace testASPWebAPI.Controllers
             }
             
 
-            Transaction transaction;
-            selectedPump.TransactionStack.TryGetValue(deliveryID, out transaction);
-            if(transaction != null)
+            Transaction transaction = getTransactionByID(pumpID, deliveryID);
+            //Transaction transaction; 
+            //selectedPump.TransactionStack.TryGetValue(deliveryID, out transaction);
+           
+            
+
+            if (transaction != null)
             {
                 if (transaction.IsLocked)
                 {
@@ -302,22 +437,32 @@ namespace testASPWebAPI.Controllers
 
             if(result)
             {
-                return new JsonResult(new { Status = "Success", LockStatus = lockStatus });
+                JsonResult response = new JsonResult(new { Status = "Success", LockStatus = lockStatus });
+                SaveQueryLog($"Lock transaction from pump {pumpID} with deliveryID {deliveryID}.\nResult: Success, LockStatus: {lockStatus}");
+                return response;
             }
             else
             {
-                return new JsonResult(new { Status = "Failed", LockStatus = lockStatus });
+                JsonResult response = new JsonResult(new { Status = "Failed", LockStatus = lockStatus, Message = message });
+                SaveQueryLog($"Lock transaction from pump {pumpID} with deliveryID {deliveryID}.\nResult: Failed. Message: {message}");
+                return response;
             }
         }
 
 
 
-        /*[Route("[action]")]
-        [HttpPost(Name = "ClearTransaction")]*/
+        [Route("[action]")]
+        [HttpPost(Name = "ClearTransaction")]
         public JsonResult ClearTransaction(JsonDocument json)
         {
-            while (!fore.IsConnected)
+            if (!IsRegistered())
             {
+                return new JsonResult(new { Message = "API is not yet registered" });
+            }
+
+            if (!isForecourtConnected())
+            {
+                isForecourtConnected();
             }
 
             int pumpID = json.RootElement.GetProperty("pumpID").GetInt32();
@@ -327,15 +472,21 @@ namespace testASPWebAPI.Controllers
 
             Pump selectedPump = fore.Pumps[pumpID];
             TransactionClass selectedTransaction;
-            Transaction equivalentTransaction;
-            selectedPump.TransactionStack.TryGetValue(deliveryID, out equivalentTransaction);
+            Transaction equivalentTransaction = getTransactionByID(pumpID, deliveryID);
+            //Transaction equivalentTransaction;
+            //selectedPump.TransactionStack.TryGetValue(deliveryID, out equivalentTransaction);
+            
+           
+            
+
             bool result = false;
             string message = "";
             try
             {
                 if(equivalentTransaction != null)
                 {
-                    equivalentTransaction.Clear(TransactionClearTypes.Normal);     
+                    equivalentTransaction.Clear(TransactionClearTypes.Normal);
+                    result = true;
                 }
                 else
                 {
@@ -356,16 +507,99 @@ namespace testASPWebAPI.Controllers
                     deliveryGrade = equivalentTransaction.DeliveryData.Grade.ToString(),
                     deliveryUnitPrice = equivalentTransaction.DeliveryData.UnitPrice,
                     deliveryQuantity = equivalentTransaction.DeliveryData.Quantity,
-                    deliveryAmount = equivalentTransaction.DeliveryData.Money
-                    //deliveryLockStatus = equivalentTransaction.IsLocked
+                    deliveryAmount = equivalentTransaction.DeliveryData.Money,
+                    deliveryLockStatus = equivalentTransaction.IsLocked
                 };
-                return new JsonResult(new { Status = "Success", Pumpid = pumpID, DeliveryID = deliveryID, SelectedTransaction = selectedTransaction });
+
+                JsonResult response = new JsonResult(new { Status = "Success", Pumpid = pumpID, DeliveryID = deliveryID, SelectedTransaction = selectedTransaction });
+                SaveQueryLog($"Clear transaction from pump {pumpID} with deliveryID {deliveryID}.\nResult: {Newtonsoft.Json.JsonConvert.SerializeObject(selectedTransaction)}");
+                return response;
             }
             else
             {
                 JsonResult response = new JsonResult(new { Status = "Failed", Message = message ?? "Error" });
+                SaveQueryLog($"Clear transaction from pump {pumpID} with deliveryID {deliveryID}.\nResult: Failed. Message: {message ?? "Error"}");
                 response.StatusCode = 500;
                 return response;
+            }
+            
+        }
+
+        private bool isForecourtConnected()
+        {
+            if (fore.IsConnected)
+            {
+                return true;
+            }
+            else
+            {
+                try
+                {
+                    int connectAttempt = 0;
+                    fore.Connect(server, terminalID, "", password, true);
+                    while (!fore.IsConnected)
+                    {
+                        Console.WriteLine("Connecting ...");
+                        Task.Delay(1000);
+                        connectAttempt++;
+                        if (connectAttempt >= 3)
+                        {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+
+        private void SaveQueryLog(string data)
+        {
+            string path = "logs\\QueryLogs.txt";
+
+            if(!System.IO.File.Exists(path))
+            {
+                using (StreamWriter sw = System.IO.File.CreateText(path))
+                {
+                   sw.WriteLine(data);
+                }
+            }
+            else
+            {
+                using (StreamWriter sw = System.IO.File.AppendText(path))
+                {
+                    sw.WriteLine(new string('=', 42));
+                    sw.WriteLine(data);
+                    
+                }
+            }
+        }
+
+        private bool IsRegistered()
+        {
+            try
+            {
+                var configParser = new FileIniDataParser();
+                IniData data = configParser.ReadFile("config.ini");
+                string regKey = data["REGISTRATION"]["KEY"];
+            
+                string volumeSerial = RegKey.GetVolumeSerial();
+                string baseboardSerial = RegKey.GetBaseBoardSerial();
+                string biosSerial = RegKey.GetBIOSID();
+                string procSerial = RegKey.GetProcessorID();
+
+                string hardwareID = volumeSerial + baseboardSerial + biosSerial + procSerial;
+                var APIKey = RegKey.ComputeSha256Hash(hardwareID);
+
+                return regKey == APIKey;
+            }
+            catch (Exception ex)
+            {
+                SaveQueryLog(ex.Message);
+                return false;
             }
             
         }

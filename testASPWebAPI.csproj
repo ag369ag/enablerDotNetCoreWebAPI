@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="ini-parser" Version="2.5.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="rda.SocketsForPCL" Version="2.0.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
@@ -17,6 +18,16 @@
     <Reference Include="ITL.Enabler.API_pcl">
       <HintPath>lib\ITL.Enabler.API_pcl.dll</HintPath>
     </Reference>
+    <Reference Include="Registration">
+      <HintPath>lib\Registration.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="config.ini">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

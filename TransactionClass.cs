@@ -8,7 +8,7 @@
         public decimal deliveryQuantity { get; set; }
         public decimal deliveryAmount { get; set; }
 
-        //public bool deliveryLockStatus { get; set; }
+        public bool deliveryLockStatus { get; set; }
 
     }
 }
