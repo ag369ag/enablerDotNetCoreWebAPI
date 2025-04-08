@@ -71,6 +71,22 @@
           }
         }
       },
+      "Scalar.AspNetCore/2.1.6": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/Scalar.AspNetCore.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Scalar.AspNetCore.dll": {
+            "related": ".xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
+      },
       "Swashbuckle.AspNetCore/6.4.0": {
         "type": "package",
         "dependencies": {
@@ -492,6 +508,23 @@
         "rda.socketsforpcl.nuspec"
       ]
     },
+    "Scalar.AspNetCore/2.1.6": {
+      "sha512": "kdF0cjD7GtjICVI1F7jlZurNMWnz05/DU4mIVioKiItFAiBwk68HUD4PZAF6dwO47Z8t8pRaKo3kC70RVV64oA==",
+      "type": "package",
+      "path": "scalar.aspnetcore/2.1.6",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "icon.png",
+        "lib/net8.0/Scalar.AspNetCore.dll",
+        "lib/net8.0/Scalar.AspNetCore.xml",
+        "lib/net9.0/Scalar.AspNetCore.dll",
+        "lib/net9.0/Scalar.AspNetCore.xml",
+        "scalar.aspnetcore.2.1.6.nupkg.sha512",
+        "scalar.aspnetcore.nuspec"
+      ]
+    },
     "Swashbuckle.AspNetCore/6.4.0": {
       "sha512": "eUBr4TW0up6oKDA5Xwkul289uqSMgY0xGN4pnbOIBqCcN9VKGGaPvHX3vWaG/hvocfGDP+MGzMA0bBBKz2fkmQ==",
       "type": "package",
@@ -577,6 +610,7 @@
   "projectFileDependencyGroups": {
     "net8.0": [
       "Newtonsoft.Json >= 13.0.3",
+      "Scalar.AspNetCore >= 2.1.6",
       "Swashbuckle.AspNetCore >= 6.4.0",
       "ini-parser >= 2.5.2",
       "rda.SocketsForPCL >= 2.0.2"
@@ -635,6 +669,10 @@
           "Newtonsoft.Json": {
             "target": "Package",
             "version": "[13.0.3, )"
+          },
+          "Scalar.AspNetCore": {
+            "target": "Package",
+            "version": "[2.1.6, )"
           },
           "Swashbuckle.AspNetCore": {
             "target": "Package",

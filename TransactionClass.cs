@@ -9,6 +9,7 @@
         public decimal deliveryAmount { get; set; }
 
         public bool deliveryLockStatus { get; set; }
+        public bool isCurrentTransaction { get; set; }
 
     }
 }

@@ -13,7 +13,7 @@ using System.Text.Json;
 
 namespace testASPWebAPI.Controllers
 {
-    [Route("[controller]")]
+    [Route("[controller]/[action]")]
     [ApiController]
     [Authorize]
 
@@ -27,9 +27,11 @@ namespace testASPWebAPI.Controllers
         private int pumpStart;
         private int pumpEnd;
 
-        
-        public PumpController()
+        private readonly ILogger<PumpController> _logger;
+
+        public PumpController(ILogger<PumpController> logger)
         {
+            _logger = logger;
             var configParser = new FileIniDataParser();
             IniData data = configParser.ReadFile("config.ini");
             server = data["Configuration"]["Server"];
@@ -45,8 +47,11 @@ namespace testASPWebAPI.Controllers
             
         }
 
-
-        [Route("[action]")]
+        /// <summary>
+        /// Getting Pump Data
+        /// </summary>
+        /// <returns>Pump data</returns>
+        //[Route("[action]")]
         [HttpGet(Name = "Getting pump data")]
         public JsonResult GetPumpData()
         {
@@ -54,21 +59,21 @@ namespace testASPWebAPI.Controllers
              {
              }*/
 
-            if (!IsRegistered())
+            /*if (!IsRegistered())
             {
                 return new JsonResult(new { Message = "API is not yet registered" });
-            }
+            }*/
 
             if (!isForecourtConnected())
             {
                 isForecourtConnected();
             }
 
-            List<PumpClass> pumpList = new List<PumpClass>();
+            List<PumpDataClass> pumpList = new List<PumpDataClass>();
             foreach (Pump item in fore.Pumps)
             {
-                List<TransactionClass> transList = new List<TransactionClass>();
-                foreach (Transaction trans in item.TransactionStack)
+                /*List<TransactionClass> transList = new List<TransactionClass>();
+                /foreach (Transaction trans in item.TransactionStack)
                 {
 
                     transList.Add(new TransactionClass
@@ -95,16 +100,14 @@ namespace testASPWebAPI.Controllers
                         });
                     
                     
-                }
+                }*/
 
                 /*if (pumpStart <= item.Number && pumpEnd >= item.Number)
                 {*/
-                    pumpList.Add(new PumpClass
+                    pumpList.Add(new PumpDataClass
                     {
                         pumpName = item.Name,
-                        pumpNumber = item.Number,
-                        pumpStack = item.TransactionStack.Count,
-                        transactions = transList
+                        pumpNumber = item.Number
                     });
                 //}
             }
@@ -113,19 +116,20 @@ namespace testASPWebAPI.Controllers
             return new JsonResult(pumpList);
         }
 
-        [Route("[action]")]
-        [HttpPost]
+        //[Route("[action]")]
+        [HttpPost(Name = "getTransactionByPumpID")]
         public JsonResult getTransactionByPumpID(JsonDocument json)
         {
+
             /*while (!fore.IsConnected)
             {
 
             }*/
 
-            if (!IsRegistered())
+            /*if (!IsRegistered())
             {
                 return new JsonResult(new { Message = "API is not yet registered" });
-            }
+            }*/
 
             if (!isForecourtConnected())
             {
@@ -138,7 +142,13 @@ namespace testASPWebAPI.Controllers
             try
             {
                 Pump selectedPump = fore.Pumps[pumpID];
-
+                if(selectedPump == null)
+                {
+                    JsonResult nullResponse = new JsonResult(new { status = "Failed", data = "Pump does not exist" });
+                    SaveQueryLog($"Get transaction by pump {pumpID}\n Result: Failed, Data: Pump does not exist");
+                    nullResponse.StatusCode = 404;
+                    return nullResponse;
+                }
                 if (selectedPump.TransactionStack.Count > 0)
                 {
                     foreach (Transaction trans in selectedPump.TransactionStack)
@@ -194,14 +204,14 @@ namespace testASPWebAPI.Controllers
             {
                 JsonResult result = new JsonResult(new { status = "Failed", data = ex.Message });
                 SaveQueryLog($"Get transaction by pump {pumpID}\n Result: Failed, Data: {ex.Message}");
-                result.StatusCode = 500;
+                result.StatusCode = 404;
                 return result;
             }            
         }
 
         
 
-        [Route("[action]")]
+        /*//[Route("[action]")]
         [HttpPost(Name = "GetTransactionInfo")]
         public JsonResult GetTransactionInfo(JsonDocument json)
         {
@@ -249,11 +259,11 @@ namespace testASPWebAPI.Controllers
             }
 
             
-        }
+        }*/
 
 
 
-        [Route("[action]")]
+        //[Route("[action]")]
         [HttpPost(Name = "VoidTransaction")]
         public JsonResult VoidTransaction(JsonDocument json)
         {
@@ -261,10 +271,10 @@ namespace testASPWebAPI.Controllers
             {
             }*/
 
-            if (!IsRegistered())
+            /*if (!IsRegistered())
             {
                 return new JsonResult(new { Message = "API is not yet registered" });
-            }
+            }*/
 
             if (!isForecourtConnected())
             {
@@ -324,7 +334,7 @@ namespace testASPWebAPI.Controllers
             {
                 JsonResult response = new JsonResult(new { Status = "Failed", Message = message ?? "Error voiding transaction" });
                 SaveQueryLog($"Void transaction from pump {pumpID} with deliveryID {deliveryID}\nResult: Failed. Message: {message ?? "Error voiding transaction"}");
-                response.StatusCode = 500;
+                response.StatusCode = 404;
                 return response;
             }
             
@@ -333,10 +343,9 @@ namespace testASPWebAPI.Controllers
         private Transaction getTransactionByID(int pumpID, int deliveryID)
         {
             Pump selectedPump = fore.Pumps[pumpID];
-
-            if (selectedPump.CurrentTransaction.DeliveryData.DeliveryID == deliveryID)
+            if(selectedPump.CurrentTransaction != null && selectedPump.CurrentTransaction.DeliveryData.DeliveryID == deliveryID)
             {
-                return selectedPump.CurrentTransaction;
+               return selectedPump.CurrentTransaction;
             }
             else
             {
@@ -360,14 +369,14 @@ namespace testASPWebAPI.Controllers
         }
 
 
-        [Route("[action]")]
-        [HttpPost]
+        //[Route("[action]")]
+        [HttpPost (Name = "LockTransaction")]
         public JsonResult LockTransaction(JsonDocument json)
         {
-            if (!IsRegistered())
+           /* if (!IsRegistered())
             {
                 return new JsonResult(new { Message = "API is not yet registered" });
-            }
+            }*/
 
             if (!isForecourtConnected())
             {
@@ -395,6 +404,10 @@ namespace testASPWebAPI.Controllers
                 {
                     result = false;
                     message = "Transaction is locked already.";
+                    if(equivalentTransaction.LockedById != terminalID)
+                    {
+                        message = $"Transaction is locked by {equivalentTransaction.LockedById}";
+                    }
                 }
                 else
                 {
@@ -444,6 +457,7 @@ namespace testASPWebAPI.Controllers
             else
             {
                 JsonResult response = new JsonResult(new { Status = "Failed", LockStatus = lockStatus, Message = message });
+                response.StatusCode = 404;
                 SaveQueryLog($"Lock transaction from pump {pumpID} with deliveryID {deliveryID}.\nResult: Failed. Message: {message}");
                 return response;
             }
@@ -451,14 +465,14 @@ namespace testASPWebAPI.Controllers
 
 
 
-        [Route("[action]")]
+        //[Route("[action]")]
         [HttpPost(Name = "ClearTransaction")]
         public JsonResult ClearTransaction(JsonDocument json)
         {
-            if (!IsRegistered())
+           /* if (!IsRegistered())
             {
                 return new JsonResult(new { Message = "API is not yet registered" });
-            }
+            }*/
 
             if (!isForecourtConnected())
             {
@@ -471,7 +485,7 @@ namespace testASPWebAPI.Controllers
             //TransactionClearTypes type = TransactionClearTypes.Normal;
 
             Pump selectedPump = fore.Pumps[pumpID];
-            TransactionClass selectedTransaction;
+            TransactionClass DeliveryInformation;
             Transaction equivalentTransaction = getTransactionByID(pumpID, deliveryID);
             //Transaction equivalentTransaction;
             //selectedPump.TransactionStack.TryGetValue(deliveryID, out equivalentTransaction);
@@ -501,7 +515,7 @@ namespace testASPWebAPI.Controllers
 
             if (result)
             {
-                selectedTransaction = new TransactionClass
+                DeliveryInformation = new TransactionClass
                 {
                     deliveryID = equivalentTransaction.DeliveryData.DeliveryID,
                     deliveryGrade = equivalentTransaction.DeliveryData.Grade.ToString(),
@@ -511,15 +525,15 @@ namespace testASPWebAPI.Controllers
                     deliveryLockStatus = equivalentTransaction.IsLocked
                 };
 
-                JsonResult response = new JsonResult(new { Status = "Success", Pumpid = pumpID, DeliveryID = deliveryID, SelectedTransaction = selectedTransaction });
-                SaveQueryLog($"Clear transaction from pump {pumpID} with deliveryID {deliveryID}.\nResult: {Newtonsoft.Json.JsonConvert.SerializeObject(selectedTransaction)}");
+                JsonResult response = new JsonResult(new { Status = "Success", Pumpid = pumpID, DeliveryID = deliveryID, SelectedTransaction = DeliveryInformation });
+                SaveQueryLog($"Clear transaction from pump {pumpID} with deliveryID {deliveryID}.\nResult: {Newtonsoft.Json.JsonConvert.SerializeObject(DeliveryInformation)}");
                 return response;
             }
             else
             {
                 JsonResult response = new JsonResult(new { Status = "Failed", Message = message ?? "Error" });
                 SaveQueryLog($"Clear transaction from pump {pumpID} with deliveryID {deliveryID}.\nResult: Failed. Message: {message ?? "Error"}");
-                response.StatusCode = 500;
+                response.StatusCode = 404;
                 return response;
             }
             
