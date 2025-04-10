@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authentication;
 using testASPWebAPI.Auth;
 using Scalar.AspNetCore;
 using Microsoft.OpenApi.Models;
+using testASPWebAPI.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +45,11 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddAuthentication("BasicAuthentication")
     .AddScheme<AuthenticationSchemeOptions, BasicAuth>("BasicAuthentication", null);
+
+builder.Services.AddDbContext<ApplicationDBContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 
 var app = builder.Build();
 

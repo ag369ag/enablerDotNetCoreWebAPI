@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Registration;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
@@ -52,6 +53,9 @@ namespace testASPWebAPI.Controllers
         /// </summary>
         /// <returns>Pump data</returns>
         //[Route("[action]")]
+       // [Tags("THIS ROUTE IS FOR GETTING PUMP DATA")]
+        //[EndpointDescription("This route doesn't need parameter")]
+        //[FromBody]
         [HttpGet(Name = "Getting pump data")]
         public JsonResult GetPumpData()
         {
@@ -170,9 +174,9 @@ namespace testASPWebAPI.Controllers
                     }
                 }
 
-                if(selectedPump.CurrentTransaction != null)
+                if(selectedPump.CurrentTransaction != null && !selectedPump.CurrentTransaction.IsLocked && selectedPump.State != PumpState.Delivering)
                 {
-                    if(!selectedPump.CurrentTransaction.IsLocked)
+                    try
                     {
                         pumpTransactions.Add(new TransactionClass
                         {
@@ -183,7 +187,16 @@ namespace testASPWebAPI.Controllers
                             deliveryAmount = selectedPump.CurrentTransaction.DeliveryData.Money,
                             deliveryLockStatus = selectedPump.CurrentTransaction.IsLocked
                         });
+
                     }
+                    catch (Exception ex)
+                    {
+                        JsonResult result = new JsonResult(new { status = "Failed", data = ex.Message });
+                        SaveQueryLog($"Get transaction by pump {pumpID}\n Result: Failed, Data: {ex.Message}");
+                        result.StatusCode = 404;
+                        return result;
+                    }
+                   
                    
                 }
 
