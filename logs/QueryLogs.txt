@@ -156,3 +156,6 @@ Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2
 ==========================================
 Get all pump data.
 Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"},{"pumpNumber":5,"pumpName":"Pump 5"},{"pumpNumber":6,"pumpName":"Pump 6"},{"pumpNumber":7,"pumpName":"Pump 7"},{"pumpNumber":8,"pumpName":"Pump 8"},{"pumpNumber":9,"pumpName":"Pump 9"},{"pumpNumber":10,"pumpName":"Pump 10"},{"pumpNumber":11,"pumpName":"Pump 11"},{"pumpNumber":12,"pumpName":"Pump 12"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"},{"pumpNumber":5,"pumpName":"Pump 5"},{"pumpNumber":6,"pumpName":"Pump 6"},{"pumpNumber":7,"pumpName":"Pump 7"},{"pumpNumber":8,"pumpName":"Pump 8"},{"pumpNumber":9,"pumpName":"Pump 9"},{"pumpNumber":10,"pumpName":"Pump 10"}]
