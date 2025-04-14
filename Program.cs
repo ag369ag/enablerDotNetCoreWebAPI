@@ -48,7 +48,16 @@ builder.Services.AddAuthentication("BasicAuthentication")
 
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    //options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+
+    var configParser = new FileIniDataParser();
+    IniData data = configParser.ReadFile("config.ini");
+    string dbServer = data["Configuration"]["Server"];
+    string dbTable = data["Database"]["Table"];
+    string dbUsername = data["Database"]["Username"];
+    string dbPassword = data["Database"]["Password"];
+    options.UseSqlServer($@"Server = {dbServer};Database={dbTable};User Id ={dbUsername};Password = {dbPassword};Trusted_Connection=True;TrustServerCertificate=True;Integrated Security = False;");
+    //options.UseSqlServer(builder.Configuration.Sources)
 });
 
 var app = builder.Build();
