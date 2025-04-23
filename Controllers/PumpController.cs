@@ -12,6 +12,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json;
@@ -184,7 +185,8 @@ namespace testASPWebAPI.Controllers
                             deliveryUnitPrice = trans.DeliveryData.UnitPrice,
                             deliveryQuantity = trans.DeliveryData.Quantity,
                             deliveryAmount = trans.DeliveryData.Money,
-                            deliveryLockStatus = trans.IsLocked
+                            deliveryLockStatus = trans.IsLocked,
+                            isCurrentTransaction = false
                         });
                     }
                 }
@@ -200,7 +202,8 @@ namespace testASPWebAPI.Controllers
                             deliveryUnitPrice = selectedPump.CurrentTransaction.DeliveryData.UnitPrice,
                             deliveryQuantity = selectedPump.CurrentTransaction.DeliveryData.Quantity,
                             deliveryAmount = selectedPump.CurrentTransaction.DeliveryData.Money,
-                            deliveryLockStatus = selectedPump.CurrentTransaction.IsLocked
+                            deliveryLockStatus = selectedPump.CurrentTransaction.IsLocked,
+                            isCurrentTransaction = true
                         });
 
                     }
@@ -209,7 +212,11 @@ namespace testASPWebAPI.Controllers
                         JsonResult result = new JsonResult(new { status = "Failed", data = ex.Message });
                         SaveQueryLog($"Get transaction by pump {pumpID}\n Result: Failed, Data: {ex.Message}");
                         result.StatusCode = 404;
-                        return result;
+                        var file = Assembly.GetExecutingAssembly().Location;
+                        Process.Start(file);
+                       //return result;
+
+
                     }
 
 
@@ -352,7 +359,8 @@ namespace testASPWebAPI.Controllers
                     deliveryUnitPrice = equivalentTransaction.DeliveryData.UnitPrice,
                     deliveryQuantity = equivalentTransaction.DeliveryData.Quantity,
                     deliveryAmount = equivalentTransaction.DeliveryData.Money,
-                    deliveryLockStatus = equivalentTransaction.IsLocked
+                    deliveryLockStatus = equivalentTransaction.IsLocked,
+                    isCurrentTransaction = fore.Pumps[pumpID].CurrentTransaction == equivalentTransaction
                 };
                 JsonResult response = new JsonResult(new { Status = "Success", Pumpid = pumpID, DeliveryID = deliveryID, SelectedTransaction = selectedTransaction });
                 SaveQueryLog($"Void transaction from pump {pumpID} with deliveryID {deliveryID}\nResult: {Newtonsoft.Json.JsonConvert.SerializeObject(selectedTransaction)}");
@@ -550,7 +558,8 @@ namespace testASPWebAPI.Controllers
                     deliveryUnitPrice = equivalentTransaction.DeliveryData.UnitPrice,
                     deliveryQuantity = equivalentTransaction.DeliveryData.Quantity,
                     deliveryAmount = equivalentTransaction.DeliveryData.Money,
-                    deliveryLockStatus = equivalentTransaction.IsLocked
+                    deliveryLockStatus = equivalentTransaction.IsLocked,
+                    isCurrentTransaction = fore.Pumps[pumpID].CurrentTransaction == equivalentTransaction
                 };
 
                 JsonResult response = new JsonResult(new { Status = "Success", Pumpid = pumpID, DeliveryID = deliveryID, SelectedTransaction = DeliveryInformation });
@@ -621,126 +630,138 @@ namespace testASPWebAPI.Controllers
         [HttpPost(Name = "SaveToDatabase")]
         public async Task<JsonResult> SaveToDatabase(JsonDocument document)
         {
-            transactionItems = new List<TransactionItemClass>();
-            transactionMOPS = new List<MopCardInfo>();
-            customerInfo = new CustomerInformations();
+            
+                transactionItems = new List<TransactionItemClass>();
+                transactionMOPS = new List<MopCardInfo>();
+                customerInfo = new CustomerInformations();
 
-            if (!isForecourtConnected())
-            {
-                isForecourtConnected();
-            }
-
-            bool gettingDiscounts = await GetDiscounts();
-
-            if(!gettingDiscounts)
-            {
-                JsonResult result = new JsonResult(new { result = "Failed", Message = "Error in getting discounts" });
-                return result;
-            }
-
-            int itemNum = 1;
-            JsonElement deliveries = document.RootElement.GetProperty("deliveries");
-            int newItemNum = getDeliveries(deliveries, itemNum);
-
-            JsonElement mops = document.RootElement.GetProperty("mop");
-            string[] mopLastValues = getMops(mops, newItemNum);
-
-            JsonElement customerInformations = document.RootElement.GetProperty("customerInfo");
-            bool getCustomerInfo = getCustomerDetails(customerInformations);
-
-            string rptToPrint = document.RootElement.GetProperty("rptToPrint").ToString();
-
-            // Clearing transactions
-            /*foreach(TransactionItemClass fuelItems in transactionItems.Where(a=>a.itemType == 2))
-            {
-                ClearTransaction(1, fuelItems.deliveryID, out bool isCompleted, out string errorMessage);
-
-                if (!isCompleted)
+                if (!isForecourtConnected())
                 {
-                    JsonResult result = new JsonResult(new { result = "Failed", Message = errorMessage });
+                    isForecourtConnected();
+                }
+
+                bool gettingDiscounts = await GetDiscounts();
+
+                if (!gettingDiscounts)
+                {
+                    JsonResult result = new JsonResult(new { result = "Failed", Message = "Error in getting discounts" });
                     return result;
                 }
-            }*/
 
+                int itemNum = 1;
+                JsonElement deliveries = document.RootElement.GetProperty("deliveries");
+                int newItemNum = getDeliveries(deliveries, itemNum);
 
-            if (getCustomerInfo)
-            {
-                List<object> DataArray = new List<object>();
+                JsonElement mops = document.RootElement.GetProperty("mop");
+                string[] mopLastValues = getMops(mops, newItemNum);
 
-                string data = Newtonsoft.Json.JsonConvert.SerializeObject(DataArray);
+                JsonElement customerInformations = document.RootElement.GetProperty("customerInfo");
+                bool getCustomerInfo = getCustomerDetails(customerInformations);
 
-                string transItems = Newtonsoft.Json.JsonConvert.SerializeObject(transactionItems);
+                string rptToPrint = document.RootElement.GetProperty("rptToPrint").ToString();
 
-                double taxtotalValue = transactionItems.Where(a => a.itemType == 2).Sum(a => a.itemTaxAmount);
-                double subtotalValue = transactionItems.Where(a => a.itemType == 2 || a.itemType == 52).Sum(a => a.itemValue);
-
-                var PaymentData = new
+                // Clearing transactions
+                /*foreach(TransactionItemClass fuelItems in transactionItems.Where(a=>a.itemType == 2))
                 {
-                    cashierID = "1",
-                    subAccID = "",
-                    accountID = "",
-                    posID = 1,
-                    num = "",
-                    periodID = "",
-                    taxTotal = taxtotalValue,
-                    saleTotal = subtotalValue,
-                    isManual = "0",
-                    isZeroRated = "0",
-                    customerName = customerInfo.name ?? mopLastValues[3],
-                    address = customerInfo.add,
-                    TIN = customerInfo.TINNumber,
-                    businessStyle = customerInfo.busStyle,
-                    cardNumber = mopLastValues[2],
-                    approvalCode = mopLastValues[0],
-                    bankCode = mopLastValues[1],
-                    type = "1",
-                    itemsString = transItems,
-                    isRefund = "0",
-                    transaction_type = "1",
-                    isRefundOrigTransNum = "",
-                    transaction_resetter = "",
-                    birReceiptType = "2",
-                    birTransNum = "",
-                    poNum = "",
-                    plateNum = "",
-                    odometer = "",
-                    transRefund = "0",
-                    grossRefund = "0",
-                    subAccAmt = "",
-                    vehicleTypeID = "",
-                    isNormalTrans = "1",
-                    attendantID = "",
-                    items = transactionItems,
-                    scData = data,
-                    pwdData = data,
-                    spData = data,
-                    naacData = data,
-                    movData = data
-                };
+                    ClearTransaction(1, fuelItems.deliveryID, out bool isCompleted, out string errorMessage);
 
-                /*JsonResult result1 = new JsonResult(new { result = transItems });
-                return result1;*/
+                    if (!isCompleted)
+                    {
+                        JsonResult result = new JsonResult(new { result = "Failed", Message = errorMessage });
+                        return result;
+                    }
+                }*/
 
-                string doneSaving = await SendToAPI(PaymentData);
 
-                if (!doneSaving.IsNullOrEmpty())
+                if (getCustomerInfo)
                 {
-                    JsonResult result = new JsonResult(new { result = "Success" });
-                    return result;
+                    List<object> DataArray = new List<object>();
+
+                    string data = Newtonsoft.Json.JsonConvert.SerializeObject(DataArray);
+
+                    string transItems = Newtonsoft.Json.JsonConvert.SerializeObject(transactionItems);
+
+                    double taxtotalValue = transactionItems.Where(a => a.itemType == 2).Sum(a => a.itemTaxAmount);
+                    double subtotalValue = transactionItems.Where(a => a.itemType == 2 || a.itemType == 52).Sum(a => a.itemValue);
+
+                    var PaymentData = new
+                    {
+                        cashierID = "1",
+                        subAccID = "",
+                        accountID = "",
+                        posID = 1,
+                        num = "",
+                        periodID = "",
+                        taxTotal = taxtotalValue,
+                        saleTotal = subtotalValue,
+                        isManual = "0",
+                        isZeroRated = "0",
+                        customerName = customerInfo.name ?? mopLastValues[3],
+                        address = customerInfo.add,
+                        TIN = customerInfo.TINNumber,
+                        businessStyle = customerInfo.busStyle,
+                        cardNumber = mopLastValues[2],
+                        approvalCode = mopLastValues[0],
+                        bankCode = mopLastValues[1],
+                        type = "1",
+                        itemsString = transItems,
+                        isRefund = "0",
+                        transaction_type = "1",
+                        isRefundOrigTransNum = "",
+                        transaction_resetter = "",
+                        birReceiptType = "2",
+                        birTransNum = "",
+                        poNum = "",
+                        plateNum = "",
+                        odometer = "",
+                        transRefund = "0",
+                        grossRefund = "0",
+                        subAccAmt = "",
+                        vehicleTypeID = "",
+                        isNormalTrans = "1",
+                        attendantID = "",
+                        items = transactionItems,
+                        scData = data,
+                        pwdData = data,
+                        spData = data,
+                        naacData = data,
+                        movData = data
+                    };
+
+                    /*JsonResult result1 = new JsonResult(new { result = transItems });
+                    return result1;*/
+
+                    string doneSaving = "";
+
+                    try
+                    { 
+                        doneSaving = await SendToAPI(PaymentData);
+                    }
+                    catch (Exception ex)
+                    {
+                        var file = Assembly.GetExecutingAssembly().Location;
+                        Process.Start(file);
+                    }
+
+                    if (!doneSaving.IsNullOrEmpty())
+                    {
+                        JsonResult result = new JsonResult(new { result = "Success" });
+                        return result;
+                    }
+                    else
+                    {
+                        JsonResult result = new JsonResult(new { result = "Failed", Message = doneSaving });
+                        return result;
+                    }
                 }
-                else
-                {
-                    JsonResult result = new JsonResult(new { result = "Failed", Message = doneSaving });
-                    return result;
-                }
-            }
 
 
 
 
 
-            JsonResult jresult = new JsonResult(new { Message = "Done"});
-            return jresult;
+                JsonResult jresult = new JsonResult(new { Message = "Done" });
+                return jresult;
+            
         }
 
         private int getDeliveries(JsonElement deliveries, int itemNum)
@@ -1016,12 +1037,21 @@ namespace testASPWebAPI.Controllers
 
         private async Task<string> SendToAPI(object obj)
         {
-            JsonDocument decodedResponse = await APIQuery(obj, addNewTransactionRoute);
-            JsonElement responseValue = decodedResponse.RootElement.GetProperty("data");
-            string receiptOrNumber = responseValue.GetProperty("or_num").ToString();
-            string receiptResetter = responseValue.GetProperty("resetter").ToString();
-            string receiptTransID = responseValue.GetProperty("transID").ToString();
-            return responseValue.ToString();
+            string response = "";
+            try
+            {
+                JsonDocument decodedResponse = await APIQuery(obj, addNewTransactionRoute);
+                JsonElement responseValue = decodedResponse.RootElement.GetProperty("data");
+                string receiptOrNumber = responseValue.GetProperty("or_num").ToString();
+                string receiptResetter = responseValue.GetProperty("resetter").ToString();
+                string receiptTransID = responseValue.GetProperty("transID").ToString();
+                response = responseValue.ToString();
+            }
+            catch (Exception ex)
+            {
+                ex.Message.ToString();
+            }
+            return response;
         }
 
 
