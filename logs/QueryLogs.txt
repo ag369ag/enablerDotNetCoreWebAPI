@@ -159,3 +159,87 @@ Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2
 ==========================================
 Get all pump data.
 Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"},{"pumpNumber":5,"pumpName":"Pump 5"},{"pumpNumber":6,"pumpName":"Pump 6"},{"pumpNumber":7,"pumpName":"Pump 7"},{"pumpNumber":8,"pumpName":"Pump 8"},{"pumpNumber":9,"pumpName":"Pump 9"},{"pumpNumber":10,"pumpName":"Pump 10"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get transaction by pump 1
+ Result: Success, Data: {"pumpNumber":1,"pumpName":"Pump 1","pumpStack":0,"transactions":[]}
+==========================================
+Get transaction by pump 2
+ Result: Success, Data: {"pumpNumber":2,"pumpName":"Pump 2","pumpStack":0,"transactions":[]}
+==========================================
+Get transaction by pump 2
+ Result: Success, Data: {"pumpNumber":2,"pumpName":"Pump 2","pumpStack":0,"transactions":[{"deliveryID":4,"deliveryGrade":"PREMIUM","deliveryUnitPrice":55.0000,"deliveryQuantity":0.9090,"deliveryAmount":50.0000,"deliveryLockStatus":false,"isCurrentTransaction":true}]}
+==========================================
+Lock transaction from pump 2 with deliveryID 4.
+Result: Success, LockStatus: True
+==========================================
+Get all pump data.
+Result: [{"pumpNumber":1,"pumpName":"Pump 1"},{"pumpNumber":2,"pumpName":"Pump 2"},{"pumpNumber":3,"pumpName":"Pump 3"},{"pumpNumber":4,"pumpName":"Pump 4"}]
+==========================================
+Get transaction by pump 2
+ Result: Success, Data: {"pumpNumber":2,"pumpName":"Pump 2","pumpStack":1,"transactions":[{"deliveryID":6,"deliveryGrade":"DIESEL","deliveryUnitPrice":10.0000,"deliveryQuantity":10.0000,"deliveryAmount":100.0000,"deliveryLockStatus":false,"isCurrentTransaction":true}]}
+==========================================
+Void transaction from pump 2 with deliveryID 4
+Result: {"deliveryID":4,"deliveryGrade":"PREMIUM","deliveryUnitPrice":55.0000,"deliveryQuantity":0.9090,"deliveryAmount":50.0000,"deliveryLockStatus":false,"isCurrentTransaction":false}
+==========================================
+Lock transaction from pump 2 with deliveryID 4.
+Result: Success, LockStatus: True

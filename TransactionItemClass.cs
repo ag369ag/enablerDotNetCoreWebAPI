@@ -23,11 +23,12 @@
         public double? itemDBPrice { get; set; }
         public string itemGCNumber { get; set; }
         public int discountPresetID { get; set; }
+        public int? pumpID { get; set; }
        
 
         public TransactionItemClass(int itemNumber, int itemType, string itemDesc, double itemPrice, double itemQTY, double itemValue, int itemID, double itemTaxAmount, int deliveryID, int itemTaxID, string gcNumber, string gcAmount,
             double? originalItemValuePreTaxChange, int isTaxExemptItem, int isZeroRatedTaxItem, double itemDiscTotal, int departmentID, string itemDiscCodeType, double? itemDBPrice, string itemGCNumber,
-            int discountPresetID)
+            int discountPresetID, int? pumpID)
         {
             this.itemNumber = itemNumber;
             this.itemType = itemType;
@@ -50,6 +51,7 @@
             this.itemDBPrice = itemDBPrice;
             this.itemGCNumber = itemGCNumber;
             this.discountPresetID = discountPresetID;
+            this.pumpID = pumpID;
         }
 
         public void ApplyDiscount(int id, int type, double value)

@@ -1,4 +1,5 @@
 ﻿using ITL.Enabler.API;
+using Microsoft.PointOfService;
 
 namespace testASPWebAPI
 {
@@ -11,6 +12,8 @@ namespace testASPWebAPI
         public List<TransactionClass> transactions { get; set; }
 
         public static Forecourt forecourt = new Forecourt();
+
+        public static PosPrinter posPrinter { get;set; }
 
         
        

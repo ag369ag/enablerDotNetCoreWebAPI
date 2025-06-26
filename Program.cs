@@ -7,6 +7,8 @@ using Scalar.AspNetCore;
 using Microsoft.OpenApi.Models;
 using testASPWebAPI.Data;
 using Microsoft.EntityFrameworkCore;
+using testASPWebAPI;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +60,8 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
     string dbPassword = data["Database"]["Password"];
     options.UseSqlServer($@"Server = {dbServer};Database={dbTable};User Id ={dbUsername};Password = {dbPassword};Trusted_Connection=True;TrustServerCertificate=True;Integrated Security = False;");
     //options.UseSqlServer(builder.Configuration.Sources)
+
+    
 });
 
 var app = builder.Build();
@@ -67,6 +71,8 @@ if (app.Environment.IsDevelopment())
 {
     
 }
+
+RequirementsFromAPI.GetPrerequisiteData();
 
 app.UseSwagger(option =>
 {
