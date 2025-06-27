@@ -1080,7 +1080,7 @@ namespace testASPWebAPI.Controllers
                 wr.WriteAttributeString("ENTITYCODE", !cfflsEmpty ? cffls.DETAIL.ITEM.ENTITYCODE : "");
                 wr.WriteAttributeString("ENTITYNAME", !cfflsEmpty ? cffls.DETAIL.ITEM.ENTITYNAME : "");
                 wr.WriteAttributeString("DISCOUNTAMOUNT", totDisc == 0 ? "" : totDisc.ToString());
-                wr.WriteAttributeString("PAEMPID", attendantID);    
+                wr.WriteAttributeString("PAEMPID", attendantID);
                 wr.WriteAttributeString("PANAME", "");
 
                 wr.WriteEndElement();
@@ -1157,7 +1157,7 @@ namespace testASPWebAPI.Controllers
 
 
                     Hose_Delivery Closing_Hose_Delivery = new Hose_Delivery();
-                    Closing_Hose_Delivery = _dbContext.Hose_Delivery.ToList().Where(a=>a.Delivery_ID == item.deliveryID).First();
+                    Closing_Hose_Delivery = _dbContext.Hose_Delivery.ToList().Where(a => a.Delivery_ID == item.deliveryID).First();
 
                     Hose_Delivery Opening_Hose_Delivery = null;
                     int openingCount = _dbContext.Hose_Delivery.ToList().Where(a => a.Hose_ID == Closing_Hose_Delivery.Hose_ID && a.Delivery_ID < a.Delivery_ID).Count();
@@ -1177,7 +1177,7 @@ namespace testASPWebAPI.Controllers
 
                     wr.WriteStartElement("ITEM");
                     wr.WriteAttributeString("PUMPID", item.pumpID.ToString());
-                    wr.WriteAttributeString("OPENPUMPREADING", Opening_Hose_Delivery == null ? "0": Opening_Hose_Delivery.Hose_Meter_Value.ToString()); // X
+                    wr.WriteAttributeString("OPENPUMPREADING", Opening_Hose_Delivery == null ? "0" : Opening_Hose_Delivery.Hose_Meter_Value.ToString()); // X
                     wr.WriteAttributeString("CLOSEPUMPREADING", Closing_Hose_Delivery.Hose_Meter_Value.ToString()); // X
                     wr.WriteAttributeString("QUANTITY", item.itemQTY.ToString());
                     wr.WriteAttributeString("TANKNO", tankNum.ToString()); // X
@@ -1207,7 +1207,7 @@ namespace testASPWebAPI.Controllers
                 Console.WriteLine(line);
             }
 
-            //RequirementsFromAPI.TestPrint(receiptString);
+            RequirementsFromAPI.TestPrint(receiptString);
 
             return true;
             try

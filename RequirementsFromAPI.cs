@@ -65,9 +65,15 @@ namespace testASPWebAPI
 
         public static void TestPrint(List<string> receiptLines)
         {
+            var configParser = new FileIniDataParser();
+            IniData configData = configParser.ReadFile("config.ini");
+
+            string printerIP = configData["Printer"]["printerIP"];
+            int printerPort = int.Parse(configData["Printer"]["printerPort"]);
+
             Socket socket = new Socket(SocketType.Stream, ProtocolType.IP);
             socket.SendTimeout = 1000;
-            socket.Connect("172.16.12.156", 9100);
+            socket.Connect(printerIP, printerPort);
             byte[] normalprintingCommand = { 0x1B, 0x00 };
             socket.Send(normalprintingCommand);
 
