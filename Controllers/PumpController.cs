@@ -1093,12 +1093,10 @@ namespace testASPWebAPI.Controllers
                 {
                     wr.WriteStartElement("MOP");
 
-                    Console.WriteLine(mop.itemID.ToString() + "         THIS IS MOP ID");
-
                     Finalisations mopData = new Finalisations();
                     mopData = _dbContext.Finalisations.ToList().Where(a => a.MOP_ID == mop.itemID).First();
 
-                    string mopdesc = mopData.MOP_Code;
+                    string mopdesc = mopData.MOP_Code!;
                     wr.WriteAttributeString("MOP_DESCRIPTION", mopdesc ?? "");
                     wr.WriteAttributeString("REFNO", mopLastValues[0]);
                     wr.WriteAttributeString("AMOUNTDUE", mop.itemValue.ToString());
