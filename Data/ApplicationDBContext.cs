@@ -16,6 +16,7 @@ namespace testASPWebAPI.Data
 
         public DbSet<Finalisations> Finalisations { get; set; }
         public DbSet<Periods> Periods { get; set; }
+        public DbSet<API_Active_Cashier> API_Active_Cashier { get; set; }
 
     }
 }

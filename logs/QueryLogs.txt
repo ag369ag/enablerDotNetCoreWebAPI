@@ -243,3 +243,66 @@ Result: {"deliveryID":4,"deliveryGrade":"PREMIUM","deliveryUnitPrice":55.0000,"d
 ==========================================
 Lock transaction from pump 2 with deliveryID 4.
 Result: Success, LockStatus: True
+==========================================
+Updating active cashier info.
+Result: Success. Message: Updating active cashier successful.
+==========================================
+Updating active cashier info.
+Result: Success. Message: Updating active cashier successful.
+==========================================
+Updating active cashier info.
+Result: Success. Message: Updating active cashier successful.
+==========================================
+Updating active cashier info.
+Result: Failed. Message: The given key 'ID' was not present in the dictionary.
+==========================================
+Updating active cashier info.
+Result: Failed. Message: The given key 'ID' was not present in the dictionary.
+==========================================
+Updating active cashier info.
+Result: Failed. Message: The given key 'ID' was not present in the dictionary.
+==========================================
+Updating active cashier info.
+Result: Failed. Message: The given key 'ID' was not present in the dictionary.
+==========================================
+Updating active cashier info.
+Result: Failed. Message: The given key 'ID' was not present in the dictionary.
+==========================================
+Updating active cashier info.
+Result: Failed. Message: The given key 'ID' was not present in the dictionary.
+==========================================
+Updating active cashier info.
+Result: Success. Message: Updating active cashier successful.
+==========================================
+Updating active cashier info.
+Result: Success. Message: Updating active cashier successful.
+==========================================
+Updating active cashier info.
+Result: Success. Message: Updating active cashier successful.
+==========================================
+Updating active cashier info.
+Result: Success. Message: Updating active cashier successful.
+==========================================
+Updating active cashier info.
+Result: Failed. Message: The given key 'ID' was not present in the dictionary.
+==========================================
+Updating active cashier info.
+Result: Failed. Message: The given key 'ID' was not present in the dictionary.
+==========================================
+Updating active cashier info.
+Result: Success. Message: Updating active cashier successful.
+==========================================
+Updating active cashier info.
+Result: Success. Message: Updating active cashier successful.
+==========================================
+Updating active cashier info.
+Result: Failed. Message: The given key 'ID' was not present in the dictionary.
+==========================================
+Updating active cashier info.
+Result: Success. Message: Updating active cashier successful.
+==========================================
+Updating active cashier info.
+Result: Success. Message: Updating active cashier successful.
+==========================================
+Updating active cashier info.
+Result: Success. Message: Updating active cashier successful.

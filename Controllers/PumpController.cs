@@ -22,6 +22,7 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
 using testASPWebAPI.Data;
@@ -409,6 +410,50 @@ namespace testASPWebAPI.Controllers
 
             
         }*/
+
+        [HttpPost(Name = "UpdateActiveCashier")]
+        public async Task<JsonResult> UpdateActiveCashier(JsonDocument json)
+        {
+
+            try
+            {
+                Dictionary<string, string> request = new Dictionary<string, string>();
+                request = JsonConvert.DeserializeObject<Dictionary<string, string>>(json.RootElement.GetRawText());
+
+                int? cashierID = int.Parse(request["CashierID"]);
+                string? cashierName = request["CashierName"];
+                string desc = request["Description"];
+
+                //Console.WriteLine(id);
+                Console.WriteLine(cashierID);
+                Console.WriteLine(cashierName);
+                Console.WriteLine(desc);
+
+                API_Active_Cashier activeCashier = new API_Active_Cashier()
+                {
+                    ID = 1,
+                    CashierName = cashierName,
+                    Description = desc,
+                    CashierID = cashierID
+                };
+
+                _dbContext.API_Active_Cashier.Update(activeCashier);
+                await _dbContext.SaveChangesAsync();
+                
+            }
+            catch (Exception ex)
+            { 
+                JsonResult response = new JsonResult(new {  statusCode = 0, statusDescription = "Failed"  });
+                response.StatusCode = 401;
+                SaveQueryLog($"Updating active cashier info.\nResult: Failed. Message: {ex.Message}");
+                return response;
+            }
+
+            JsonResult resp = new JsonResult(new { statusCode = 1, statusDescription = "Success", data = "Updating active cashier successful." });
+            resp.StatusCode = 200;
+            SaveQueryLog($"Updating active cashier info.\nResult: Success. Message: Updating active cashier successful.");
+            return resp;
+        }
 
 
 
@@ -1037,15 +1082,18 @@ namespace testASPWebAPI.Controllers
 
                 Periods prds = new Periods();
                 prds = _dbContext.Periods.ToList().Where(a => a.Period_State == 1 && a.Period_Type == 1).First();
+                //string activeShiftDesc = prds.Shift_number > 4? "US" : 
+                API_Active_Cashier activeCashier = new API_Active_Cashier();
+                activeCashier = _dbContext.API_Active_Cashier.ToList().First();
 
                 wr.WriteAttributeString("BATCH", prds.Period_ID.ToString());   // X
 
                 wr.WriteAttributeString("TRANSACTION", formattedORNum);
-                wr.WriteAttributeString("CID", cshrID);
-                wr.WriteAttributeString("ONAME", "Datalogic");   //CASHIER NAME
+                wr.WriteAttributeString("CID", activeCashier.ID.ToString());
+                wr.WriteAttributeString("ONAME", activeCashier.CashierName);   //CASHIER NAME
 
                 wr.WriteAttributeString("PID", prds.Period_ID.ToString()); // X
-                wr.WriteAttributeString("SHIFT", prds.Shift_number.ToString()); // X
+                wr.WriteAttributeString("SHIFT", prds.Shift_number.ToString() + activeCashier.Description); // X
 
                 bool cfflsEmpty = string.IsNullOrEmpty(cffls.HEADER.REFNO);
 
