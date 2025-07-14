@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using testASPWebAPI.Data;
 
 namespace testASPWebAPI
 {
@@ -53,7 +54,7 @@ namespace testASPWebAPI
             receiptHeaderFooter = new ReceiptHeaderFooter();
             taxes = new List<Tax>();
 
-            LoginCashier(loginRoute, cashierID, cashierPass);
+            //LoginCashier(loginRoute, cashierID, cashierPass);
             GetTaxes(taxListRoute);
             GetDiscountPresets(getDiscountsRoute);
             GetReceiptLayout(getReceiptLayoutRoute, POSID);
@@ -132,11 +133,11 @@ namespace testASPWebAPI
             return true;
         }
 
-        private static async void LoginCashier(string loginRoute, string cashierID, string cashierPass)
+        private static async void LoginCashier(string loginRoute, string cashierID, string cashierPass, ApplicationDBContext dbContext)
         {
             try
             {
-                object cashierData = new
+                /*object cashierData = new
                 {
                     number = cashierID,
                     password = cashierPass
@@ -157,7 +158,8 @@ namespace testASPWebAPI
                 //JsonElement jsonResponseElement = response.RootElement.GetProperty("data");
                 CashierLoginData cashierInfo = new CashierLoginData();
                 cashierInfo = JsonConvert.DeserializeObject<CashierLoginData>(response["data"].ToString());
-                cashierName = cashierInfo.name.Trim();
+                cashierName = cashierInfo.name.Trim();*/
+                cashierName = dbContext.API_Active_Cashier.ToList().First().CashierName;
 
                 Console.WriteLine($"Cashier name is: {cashierName}");
 

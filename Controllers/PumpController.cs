@@ -102,7 +102,7 @@ namespace testASPWebAPI.Controllers
             //getDiscountsRoute = "http://" + APIBaseRoute + data["ConnectedAPI"]["GetDiscountRoute"];
             //getReceiptLayoutRoute = "http://" + APIBaseRoute + data["ConnectedAPI"]["GetReceiptLayout"];
 
-            cshrID = data["CashierCreds"]["ID"];
+            cshrID = "";
 
 
             if (!fore.IsConnected)
@@ -819,12 +819,14 @@ namespace testASPWebAPI.Controllers
         [HttpPost(Name = "SaveToDatabase")]
         public async Task<JsonResult> SaveToDatabase(JsonDocument document)
         {
+            cashierName = _dbContext.API_Active_Cashier.ToList().First().CashierName;
+            cshrID = _dbContext.API_Active_Cashier.ToList().First().CashierID.ToString();
 
             transactionItems = new List<TransactionItemClass>();
             transactionMOPS = new List<MopCardInfo>();
             customerInfo = new CustomerInformations();
 
-            cashierName = RequirementsFromAPI.cashierName;
+            //cashierName = RequirementsFromAPI.cashierName;
             taxes = RequirementsFromAPI.taxes;
             discountPresets = RequirementsFromAPI.discountPresets;
             receiptHeaderFooter = RequirementsFromAPI.receiptHeaderFooter;
