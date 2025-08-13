@@ -218,6 +218,7 @@ namespace testASPWebAPI
                 //JsonElement jsonResponseElement = decodedResponse.RootElement.GetProperty("data");
                 Dictionary<string, object> decodedResponse = await APIQuery(emptyObject, getDiscountsRoute);
                 string jsonResponseElement = decodedResponse["data"].ToString();
+                Console.WriteLine(jsonResponseElement);
                 int discType = 0;
                 foreach (var data in JsonDocument.Parse(jsonResponseElement).RootElement.EnumerateArray())
                 {

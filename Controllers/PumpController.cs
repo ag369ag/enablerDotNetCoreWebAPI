@@ -16,6 +16,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
+using System.Numerics;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Reflection.Metadata;
@@ -47,9 +48,14 @@ namespace testASPWebAPI.Controllers
         private int pumpStart;
         private int pumpEnd;
         private int POSID = 0;
+        private int transactionNum = 0;
+        private string siNum = "";
 
         private string APIBaseRoute;
         private string addNewTransactionRoute;
+        private string saveToLogRoute;
+        private string saveToJournalRoute;
+        private bool autoPrint;
         //private string getDiscountsRoute;
         //private string getReceiptLayoutRoute;
 
@@ -99,6 +105,9 @@ namespace testASPWebAPI.Controllers
             // from connected API
             APIBaseRoute = data["ConnectedAPI"]["APIBaseRoute"];
             addNewTransactionRoute = "http://" + APIBaseRoute + data["ConnectedAPI"]["AddToTransactionRoute"];
+            saveToLogRoute = "http://" + APIBaseRoute + data["ConnectedAPI"]["SaveToLogRoute"];
+            saveToJournalRoute = "http://" + APIBaseRoute + data["ConnectedAPI"]["SaveToJournalRoute"];
+            autoPrint = bool.Parse(data["Printer"]["AutoPrint"].ToString());
             //getDiscountsRoute = "http://" + APIBaseRoute + data["ConnectedAPI"]["GetDiscountRoute"];
             //getReceiptLayoutRoute = "http://" + APIBaseRoute + data["ConnectedAPI"]["GetReceiptLayout"];
 
@@ -548,6 +557,7 @@ namespace testASPWebAPI.Controllers
         private Transaction getTransactionByID(int pumpID, int deliveryID)
         {
             Pump selectedPump = fore.Pumps[pumpID];
+            
             if (selectedPump.CurrentTransaction != null && selectedPump.CurrentTransaction.DeliveryData.DeliveryID == deliveryID)
             {
                 return selectedPump.CurrentTransaction;
@@ -819,6 +829,11 @@ namespace testASPWebAPI.Controllers
         [HttpPost(Name = "SaveToDatabase")]
         public async Task<JsonResult> SaveToDatabase(JsonDocument document)
         {
+            try
+            {
+
+           
+
             cashierName = _dbContext.API_Active_Cashier.ToList().First().CashierName;
             cshrID = _dbContext.API_Active_Cashier.ToList().First().CashierID.ToString();
 
@@ -879,14 +894,21 @@ namespace testASPWebAPI.Controllers
             Dictionary<string, object> keyValuePairs = new Dictionary<string, object>();
             keyValuePairs = JsonConvert.DeserializeObject<Dictionary<string, object>>(document.RootElement.GetRawText());
 
-
-
             int itemNum = 1;
             int newItemNum = getDeliveries(keyValuePairs["deliveries"].ToString(), itemNum);
 
+            if(newItemNum == 0)
+            {
+                JsonResult invalidDeliveryID = new JsonResult(new { Message = "Delivery does not exist" });
+                invalidDeliveryID.StatusCode = 404;
+                return invalidDeliveryID;
+            }
+
+
             mopLastValues = getMops(keyValuePairs["mop"].ToString(), newItemNum);
 
-
+            /*JsonResult result1 = new JsonResult(new { result = "test", Message = "test" });
+            return result1;*/
 
             bool getCustomerInfo = getCustomerDetails(keyValuePairs["customerInfo"].ToString());
 
@@ -903,19 +925,6 @@ namespace testASPWebAPI.Controllers
                 JsonResult result = new JsonResult(new { result = "Failed", Message = "Failed getting value" });
                 return result;
             }
-
-            // Clearing transactions
-            /*foreach (TransactionItemClass fuelItems in transactionItems.Where(a => a.itemType == 2))
-            {
-                ClearTransaction(1, fuelItems.deliveryID, out bool isCompleted, out string errorMessage);
-
-                if (!isCompleted)
-                {
-                    JsonResult result = new JsonResult(new { result = "Failed", Message = errorMessage });
-                    return result;
-                }
-            }*/
-
 
             List<object> DataArray = new List<object>();
 
@@ -1019,8 +1028,21 @@ namespace testASPWebAPI.Controllers
             if (!XMLCreated)
             {
                 JsonResult notRegisteredResponse = new JsonResult(new { Message = "Error generating XML" });
-                notRegisteredResponse.StatusCode = 401;
+                notRegisteredResponse.StatusCode = 500;
                 return notRegisteredResponse;
+            }
+
+            // Clearing transactions
+            foreach (TransactionItemClass fuelItems in transactionItems.Where(a => a.itemType == 2))
+            {
+
+                ClearTransaction((int)fuelItems.pumpID, fuelItems.deliveryID, out bool isCompleted, out string errorMessage);
+
+                if (!isCompleted)
+                {
+                    JsonResult result = new JsonResult(new { result = "Failed", Message = errorMessage });
+                    return result;
+                }
             }
 
             bool receiptPrinted = true;
@@ -1028,14 +1050,21 @@ namespace testASPWebAPI.Controllers
             if (!receiptPrinted)
             {
                 JsonResult notRegisteredResponse = new JsonResult(new { Message = "Error printing receipt" });
-                notRegisteredResponse.StatusCode = 401;
+                notRegisteredResponse.StatusCode = 500;
                 return notRegisteredResponse;
             }
 
 
             JsonResult res = new JsonResult(new { result = "Success" });
             return res;
-
+            
+            }
+            catch (Exception e)
+            {
+                JsonResult notRegisteredResponse = new JsonResult(new { Message = e.Message });
+                notRegisteredResponse.StatusCode = 500;
+                return notRegisteredResponse;
+            }
 
 
         }
@@ -1252,12 +1281,44 @@ namespace testASPWebAPI.Controllers
 
         private async Task<bool> PrintReceipt()
         {
+            string receiptToDB = "";
             foreach (string line in receiptString)
             {
                 Console.WriteLine(line);
+                receiptToDB += $"{line}\n";
             }
 
-            RequirementsFromAPI.TestPrint(receiptString);
+            object toPrintLog = new
+            {
+                posID = POSID,
+                printedData = receiptToDB
+            };
+
+            object toEJournal = new
+            {
+                posID = POSID,
+                data = receiptToDB.Replace(' ', '='),
+                Transaction_ID = transactionNum,
+                si_number = siNum
+            };
+            
+            APIQuery(toEJournal, saveToJournalRoute);
+
+            if (!autoPrint)
+            {
+                return true;
+            }
+            
+            APIQuery(toPrintLog, saveToLogRoute);
+            
+            try
+            {
+                RequirementsFromAPI.TestPrint(receiptString);
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
 
             return true;
             try
@@ -1402,6 +1463,9 @@ namespace testASPWebAPI.Controllers
 
             receiptString.Add("");
 
+            siNum = FormatInvoiceNum(orNum.Trim(), orResetter.Trim());
+            transactionNum = int.Parse(transID.Trim());
+            
 
             DateTime nowDate = DateTime.Now;                            //System date
             DateTimeFormatInfo dateFormat = new DateTimeFormatInfo();   //Date Format
@@ -1409,7 +1473,7 @@ namespace testASPWebAPI.Controllers
             string strDate = nowDate.ToString("MM/dd/yyyy hh:mm tt", dateFormat);
 
             ReceiptSideString(strDate.Trim(), $"POS #{POSID}");
-            ReceiptSideString(cashierName, FormatInvoiceNum(orNum.Trim(), orResetter.Trim()));
+            ReceiptSideString(cashierName, siNum);
 
             receiptString.Add("");
             receiptString.Add("");
@@ -1628,6 +1692,11 @@ namespace testASPWebAPI.Controllers
             {
                 Transaction trs = getTransactionByID(int.Parse(delivery["pumpID"].ToString()), int.Parse(delivery["deliveryID"].ToString()));
 
+                if(trs == null)
+                {
+                    return 0;
+                }
+
                 transactionItems.Add(new TransactionItemClass(
                     itemNum,
                     2,
@@ -1666,6 +1735,7 @@ namespace testASPWebAPI.Controllers
 
 
 
+
                     /* foreach (var discountDesc in delivery.GetProperty("discount").EnumerateObject())
                      {
                          switch (discountDesc.Name)
@@ -1691,6 +1761,9 @@ namespace testASPWebAPI.Controllers
                          }
                      }*/
 
+                    
+
+
                     DiscountPresets appliedDiscount = discountPresets.Where(a => a.presetId == discPresetID).First();
                     string discountPresetName = appliedDiscount.presetName;
                     int discountID = appliedDiscount.presetDiscountId;
@@ -1698,6 +1771,11 @@ namespace testASPWebAPI.Controllers
                     transactionItems[itemNum - 2].ApplyDiscount(discPresetID, discType, discValue);
                     getDiscountInfo(itemNum - 2, discType, discValue, out double transPrice, out double transVolume, out double transValue);
 
+                    Console.WriteLine(discPresetID);
+                    Console.WriteLine(discType);
+                    Console.WriteLine(discValue);
+                    Console.WriteLine(transValue);
+                    Console.WriteLine(transactionItems[itemNum - 2].itemDiscTotal);
                     transactionItems.Add(new TransactionItemClass(itemNum,
                         52,
                         discountPresetName,
