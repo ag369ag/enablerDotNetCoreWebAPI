@@ -3,24 +3,28 @@
   "WorkspaceRootPath": "D:\\source\\repos\\testASPWebAPI\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|d:\\source\\repos\\testaspwebapi\\controllers\\pumpcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|solutionrelative:controllers\\pumpcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|d:\\source\\repos\\testaspwebapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|d:\\source\\repos\\testaspwebapi\\requirementsfromapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|solutionrelative:requirementsfromapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|d:\\source\\repos\\testaspwebapi\\config.ini||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|solutionrelative:config.ini||{3B902123-F8A7-4915-9F01-361F908088D0}"
+      "AbsoluteMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|d:\\source\\repos\\testaspwebapi\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|solutionrelative:data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|d:\\source\\repos\\testaspwebapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|d:\\source\\repos\\testaspwebapi\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|solutionrelative:data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|d:\\source\\repos\\testaspwebapi\\config.ini||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|solutionrelative:config.ini||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|d:\\source\\repos\\testaspwebapi\\requirementsfromapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|solutionrelative:requirementsfromapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|d:\\source\\repos\\testaspwebapi\\controllers\\pumpcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|solutionrelative:controllers\\pumpcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F2F2417A-6D58-4D57-86E9-DA2B724613CB}|testASPWebAPI.csproj|d:\\source\\repos\\testaspwebapi\\auth\\basicauth.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -62,7 +66,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 15,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
@@ -82,7 +86,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 0,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\source\\repos\\testASPWebAPI\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "D:\\source\\repos\\testASPWebAPI\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-08-14T08:37:08.914Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
               "Title": "CashierLoginData.cs",
               "DocumentMoniker": "D:\\source\\repos\\testASPWebAPI\\CashierLoginData.cs",
               "RelativeDocumentMoniker": "CashierLoginData.cs",
@@ -94,7 +111,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "APIResponse.cs",
               "DocumentMoniker": "D:\\source\\repos\\testASPWebAPI\\APIResponse.cs",
               "RelativeDocumentMoniker": "APIResponse.cs",
@@ -106,7 +123,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "API_Active_Cashier.cs",
               "DocumentMoniker": "D:\\source\\repos\\testASPWebAPI\\API_Active_Cashier.cs",
               "RelativeDocumentMoniker": "API_Active_Cashier.cs",
@@ -118,7 +135,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "Finalisations.cs",
               "DocumentMoniker": "D:\\source\\repos\\testASPWebAPI\\Finalisations.cs",
               "RelativeDocumentMoniker": "Finalisations.cs",
@@ -130,33 +147,33 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 1,
               "Title": "ApplicationDBContext.cs",
               "DocumentMoniker": "D:\\source\\repos\\testASPWebAPI\\Data\\ApplicationDBContext.cs",
               "RelativeDocumentMoniker": "Data\\ApplicationDBContext.cs",
               "ToolTip": "D:\\source\\repos\\testASPWebAPI\\Data\\ApplicationDBContext.cs",
               "RelativeToolTip": "Data\\ApplicationDBContext.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAoAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-06-26T07:19:35.109Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\source\\repos\\testASPWebAPI\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
               "ToolTip": "D:\\source\\repos\\testASPWebAPI\\Program.cs",
               "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAAAEoAAAAoAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEoAAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-06-26T07:17:40.963Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "BasicAuth.cs",
               "DocumentMoniker": "D:\\source\\repos\\testASPWebAPI\\Auth\\BasicAuth.cs",
               "RelativeDocumentMoniker": "Auth\\BasicAuth.cs",
@@ -164,12 +181,11 @@
               "RelativeToolTip": "Auth\\BasicAuth.cs",
               "ViewState": "AgIAAAkAAAAAAAAAAAAAAAwAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-26T07:15:28.481Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-26T07:15:28.481Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "Hose_Delivery_Class.cs",
               "DocumentMoniker": "D:\\source\\repos\\testASPWebAPI\\Hose_Delivery_Class.cs",
               "RelativeDocumentMoniker": "Hose_Delivery_Class.cs",
@@ -181,7 +197,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "CFFLS.cs",
               "DocumentMoniker": "D:\\source\\repos\\testASPWebAPI\\CFFLS.cs",
               "RelativeDocumentMoniker": "CFFLS.cs",
@@ -193,7 +209,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 13,
               "Title": "Tax.cs",
               "DocumentMoniker": "D:\\source\\repos\\testASPWebAPI\\Tax.cs",
               "RelativeDocumentMoniker": "Tax.cs",
@@ -205,39 +221,38 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "config.ini",
               "DocumentMoniker": "D:\\source\\repos\\testASPWebAPI\\config.ini",
               "RelativeDocumentMoniker": "config.ini",
               "ToolTip": "D:\\source\\repos\\testASPWebAPI\\config.ini",
               "RelativeToolTip": "config.ini",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAAAvAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002768|",
               "WhenOpened": "2025-06-25T06:34:14.481Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 5,
               "Title": "PumpController.cs",
               "DocumentMoniker": "D:\\source\\repos\\testASPWebAPI\\Controllers\\PumpController.cs",
               "RelativeDocumentMoniker": "Controllers\\PumpController.cs",
               "ToolTip": "D:\\source\\repos\\testASPWebAPI\\Controllers\\PumpController.cs",
               "RelativeToolTip": "Controllers\\PumpController.cs",
-              "ViewState": "AgIAAKcGAAAAAAAAAAApwMEGAAAUAAAAAAAAAA==",
+              "ViewState": "AgIAAFQFAAAAAAAAAAASwIwFAABNAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-25T06:33:44.27Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-25T06:33:44.27Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "RequirementsFromAPI.cs",
               "DocumentMoniker": "D:\\source\\repos\\testASPWebAPI\\RequirementsFromAPI.cs",
               "RelativeDocumentMoniker": "RequirementsFromAPI.cs",
               "ToolTip": "D:\\source\\repos\\testASPWebAPI\\RequirementsFromAPI.cs",
               "RelativeToolTip": "RequirementsFromAPI.cs",
-              "ViewState": "AgIAAKkAAAAAAAAAAADgv9IAAAAIAAAAAAAAAA==",
+              "ViewState": "AgIAAKgAAAAAAAAAAAArwL8AAABKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-06-25T06:22:16.949Z",
               "EditorCaption": ""

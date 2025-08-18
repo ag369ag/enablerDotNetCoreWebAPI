@@ -55,7 +55,8 @@ namespace testASPWebAPI.Controllers
         private string addNewTransactionRoute;
         private string saveToLogRoute;
         private string saveToJournalRoute;
-        private bool autoPrint;
+        //private bool autoPrint;
+
         //private string getDiscountsRoute;
         //private string getReceiptLayoutRoute;
 
@@ -107,7 +108,8 @@ namespace testASPWebAPI.Controllers
             addNewTransactionRoute = "http://" + APIBaseRoute + data["ConnectedAPI"]["AddToTransactionRoute"];
             saveToLogRoute = "http://" + APIBaseRoute + data["ConnectedAPI"]["SaveToLogRoute"];
             saveToJournalRoute = "http://" + APIBaseRoute + data["ConnectedAPI"]["SaveToJournalRoute"];
-            autoPrint = bool.Parse(data["Printer"]["AutoPrint"].ToString());
+            //autoPrint = bool.Parse(data["Printer"]["AutoPrint"].ToString());
+
             //getDiscountsRoute = "http://" + APIBaseRoute + data["ConnectedAPI"]["GetDiscountRoute"];
             //getReceiptLayoutRoute = "http://" + APIBaseRoute + data["ConnectedAPI"]["GetReceiptLayout"];
 
@@ -448,11 +450,11 @@ namespace testASPWebAPI.Controllers
 
                 _dbContext.API_Active_Cashier.Update(activeCashier);
                 await _dbContext.SaveChangesAsync();
-                
+
             }
             catch (Exception ex)
-            { 
-                JsonResult response = new JsonResult(new {  statusCode = 0, statusDescription = "Failed"  });
+            {
+                JsonResult response = new JsonResult(new { statusCode = 0, statusDescription = "Failed" });
                 response.StatusCode = 401;
                 SaveQueryLog($"Updating active cashier info.\nResult: Failed. Message: {ex.Message}");
                 return response;
@@ -557,7 +559,7 @@ namespace testASPWebAPI.Controllers
         private Transaction getTransactionByID(int pumpID, int deliveryID)
         {
             Pump selectedPump = fore.Pumps[pumpID];
-            
+
             if (selectedPump.CurrentTransaction != null && selectedPump.CurrentTransaction.DeliveryData.DeliveryID == deliveryID)
             {
                 return selectedPump.CurrentTransaction;
@@ -832,232 +834,234 @@ namespace testASPWebAPI.Controllers
             try
             {
 
-           
-
-            cashierName = _dbContext.API_Active_Cashier.ToList().First().CashierName;
-            cshrID = _dbContext.API_Active_Cashier.ToList().First().CashierID.ToString();
-
-            transactionItems = new List<TransactionItemClass>();
-            transactionMOPS = new List<MopCardInfo>();
-            customerInfo = new CustomerInformations();
-
-            //cashierName = RequirementsFromAPI.cashierName;
-            taxes = RequirementsFromAPI.taxes;
-            discountPresets = RequirementsFromAPI.discountPresets;
-            receiptHeaderFooter = RequirementsFromAPI.receiptHeaderFooter;
-
-            CFFLS cffls = new CFFLS();
-
-            /* bool isLoggedIn = await loginCashier();
-             if (!isLoggedIn)
-             {
-                 JsonResult notRegisteredResponse = new JsonResult(new { Message = "Cashier is not logged in" });
-                 notRegisteredResponse.StatusCode = 401;
-                 return notRegisteredResponse;
-             }*/
-
-            if (!IsRegistered())
-            {
-                JsonResult notRegisteredResponse = new JsonResult(new { Message = "API is not yet registered" });
-                notRegisteredResponse.StatusCode = 401;
-                return notRegisteredResponse;
-            }
-
-            if (!isForecourtConnected())
-            {
-                isForecourtConnected();
-            }
 
 
+                cashierName = _dbContext.API_Active_Cashier.ToList().First().CashierName;
+                cshrID = _dbContext.API_Active_Cashier.ToList().First().CashierID.ToString();
 
-            /*
-                        InitializePrinter();
+                transactionItems = new List<TransactionItemClass>();
+                transactionMOPS = new List<MopCardInfo>();
+                customerInfo = new CustomerInformations();
 
-                        bool isPrinterClaimed = await ClaimPrinter();
-                        if (!isPrinterClaimed)
-                        {
-                            JsonResult notRegisteredResponse = new JsonResult(new { Message = "Error claiming printer/printer not found." });
-                            notRegisteredResponse.StatusCode = 404;
-                            return notRegisteredResponse;
-                        }
-            */
-            /*bool gettingDiscounts = await GetDiscounts();
+                //cashierName = RequirementsFromAPI.cashierName;
+                taxes = RequirementsFromAPI.taxes;
+                discountPresets = RequirementsFromAPI.discountPresets;
+                receiptHeaderFooter = RequirementsFromAPI.receiptHeaderFooter;
 
-            if (!gettingDiscounts)
-            {
-                JsonResult result = new JsonResult(new { result = "Failed", Message = "Error in getting discounts" });
-                return result;
-            }*/
+                CFFLS cffls = new CFFLS();
 
+                /* bool isLoggedIn = await loginCashier();
+                 if (!isLoggedIn)
+                 {
+                     JsonResult notRegisteredResponse = new JsonResult(new { Message = "Cashier is not logged in" });
+                     notRegisteredResponse.StatusCode = 401;
+                     return notRegisteredResponse;
+                 }*/
 
-
-            Dictionary<string, object> keyValuePairs = new Dictionary<string, object>();
-            keyValuePairs = JsonConvert.DeserializeObject<Dictionary<string, object>>(document.RootElement.GetRawText());
-
-            int itemNum = 1;
-            int newItemNum = getDeliveries(keyValuePairs["deliveries"].ToString(), itemNum);
-
-            if(newItemNum == 0)
-            {
-                JsonResult invalidDeliveryID = new JsonResult(new { Message = "Delivery does not exist" });
-                invalidDeliveryID.StatusCode = 404;
-                return invalidDeliveryID;
-            }
-
-
-            mopLastValues = getMops(keyValuePairs["mop"].ToString(), newItemNum);
-
-            /*JsonResult result1 = new JsonResult(new { result = "test", Message = "test" });
-            return result1;*/
-
-            bool getCustomerInfo = getCustomerDetails(keyValuePairs["customerInfo"].ToString());
-
-            string rptToPrint = keyValuePairs["rptToPrint"].ToString();
-
-            cffls = JsonConvert.DeserializeObject<CFFLS>(keyValuePairs["cffls"].ToString());
-
-            string vehicleType = keyValuePairs["VehicleTypeID"].ToString();
-            string attendantID = keyValuePairs["attendantID"].ToString();
-            string pgCardNumber = keyValuePairs["pgCardNumber"].ToString();
-
-            if (!getCustomerInfo)
-            {
-                JsonResult result = new JsonResult(new { result = "Failed", Message = "Failed getting value" });
-                return result;
-            }
-
-            List<object> DataArray = new List<object>();
-
-            string data = Newtonsoft.Json.JsonConvert.SerializeObject(DataArray);
-
-            string transItems = Newtonsoft.Json.JsonConvert.SerializeObject(transactionItems);
-
-            double taxtotalValue = transactionItems.Where(a => a.itemType == 2).Sum(a => a.itemTaxAmount);
-            double subtotalValue = transactionItems.Where(a => a.itemType == 2 || a.itemType == 52).Sum(a => a.itemValue);
-
-            object PaymentData = new
-            {
-                cashierID = cshrID,
-                subAccID = "",
-                accountID = "",
-                posID = POSID,
-                num = "",
-                periodID = "",
-                taxTotal = taxtotalValue,
-                saleTotal = subtotalValue,
-                isManual = "0",
-                isZeroRated = "0",
-                customerName = customerInfo.name ?? mopLastValues[3],
-                address = customerInfo.add,
-                TIN = customerInfo.TINNumber,
-                businessStyle = customerInfo.busStyle,
-                cardNumber = mopLastValues[2],
-                approvalCode = mopLastValues[0],
-                bankCode = mopLastValues[1],
-                type = "1",
-                itemsString = transItems,
-                isRefund = "0",
-                transaction_type = "1",
-                isRefundOrigTransNum = "",
-                transaction_resetter = "",
-                birReceiptType = "2",
-                birTransNum = "",
-                poNum = "",
-                plateNum = "",
-                odometer = "",
-                transRefund = "0",
-                grossRefund = "0",
-                subAccAmt = "",
-                vehicleTypeID = vehicleType,
-                isNormalTrans = "1",
-                attendantID = "",
-                items = transactionItems,
-                scData = data,
-                pwdData = data,
-                spData = data,
-                naacData = data,
-                movData = data,
-                serviceAmount = 0
-            };
-
-
-
-
-            string doneSaving = "";
-
-            try
-            {
-                doneSaving = await SendToAPI(PaymentData);
-            }
-            catch (Exception ex)
-            {
-                var file = Assembly.GetExecutingAssembly().Location;
-                Process.Start(file);
-            }
-
-            if (string.IsNullOrEmpty(doneSaving))
-            {
-
-                JsonResult result = new JsonResult(new { result = "Failed", Message = doneSaving, task = "Send to api" });
-                return result;
-
-            }
-
-            // done saving sample
-            // {"resetter":0,"or_num":17,"transID":"28"}
-
-            AddToTransResponse transNums = new AddToTransResponse();
-            transNums = JsonConvert.DeserializeObject<AddToTransResponse>(doneSaving);
-
-            string receiptOrNumber = transNums.or_num.ToString();
-            string receiptResetter = transNums.resetter.ToString();
-            string receiptTransID = transNums.transID.ToString();
-
-
-            bool receipt = true;
-            receipt = await createReceipt(transactionItems, receiptOrNumber, receiptResetter, receiptTransID, rptToPrint);
-
-            if (!receipt)
-            {
-                JsonResult result = new JsonResult(new { result = "Failed", Message = "Failed creating receipt" });
-                return result;
-            }
-
-            bool XMLCreated = await CreateXML(receiptOrNumber, receiptResetter, taxtotalValue, subtotalValue, vehicleType, attendantID, pgCardNumber, PaymentData, cffls);
-
-            if (!XMLCreated)
-            {
-                JsonResult notRegisteredResponse = new JsonResult(new { Message = "Error generating XML" });
-                notRegisteredResponse.StatusCode = 500;
-                return notRegisteredResponse;
-            }
-
-            // Clearing transactions
-            foreach (TransactionItemClass fuelItems in transactionItems.Where(a => a.itemType == 2))
-            {
-
-                ClearTransaction((int)fuelItems.pumpID, fuelItems.deliveryID, out bool isCompleted, out string errorMessage);
-
-                if (!isCompleted)
+                if (!IsRegistered())
                 {
-                    JsonResult result = new JsonResult(new { result = "Failed", Message = errorMessage });
+                    JsonResult notRegisteredResponse = new JsonResult(new { Message = "API is not yet registered" });
+                    notRegisteredResponse.StatusCode = 401;
+                    return notRegisteredResponse;
+                }
+
+                if (!isForecourtConnected())
+                {
+                    isForecourtConnected();
+                }
+
+
+
+                /*
+                            InitializePrinter();
+
+                            bool isPrinterClaimed = await ClaimPrinter();
+                            if (!isPrinterClaimed)
+                            {
+                                JsonResult notRegisteredResponse = new JsonResult(new { Message = "Error claiming printer/printer not found." });
+                                notRegisteredResponse.StatusCode = 404;
+                                return notRegisteredResponse;
+                            }
+                */
+                /*bool gettingDiscounts = await GetDiscounts();
+
+                if (!gettingDiscounts)
+                {
+                    JsonResult result = new JsonResult(new { result = "Failed", Message = "Error in getting discounts" });
+                    return result;
+                }*/
+
+
+
+                Dictionary<string, object> keyValuePairs = new Dictionary<string, object>();
+                keyValuePairs = JsonConvert.DeserializeObject<Dictionary<string, object>>(document.RootElement.GetRawText());
+
+                int itemNum = 1;
+                int newItemNum = getDeliveries(keyValuePairs["deliveries"].ToString(), itemNum);
+
+                if (newItemNum == 0)
+                {
+                    JsonResult invalidDeliveryID = new JsonResult(new { Message = "Delivery does not exist" });
+                    invalidDeliveryID.StatusCode = 404;
+                    return invalidDeliveryID;
+                }
+
+
+                mopLastValues = getMops(keyValuePairs["mop"].ToString(), newItemNum);
+
+                /*JsonResult result1 = new JsonResult(new { result = "test", Message = "test" });
+                return result1;*/
+
+                bool getCustomerInfo = getCustomerDetails(keyValuePairs["customerInfo"].ToString());
+
+                string rptToPrint = keyValuePairs["rptToPrint"].ToString();
+
+                cffls = JsonConvert.DeserializeObject<CFFLS>(keyValuePairs["cffls"].ToString());
+
+                string vehicleType = keyValuePairs["VehicleTypeID"].ToString();
+                string attendantID = keyValuePairs["attendantID"].ToString();
+                string pgCardNumber = keyValuePairs["pgCardNumber"].ToString();
+
+                ReceiptData receiptData = JsonConvert.DeserializeObject<ReceiptData>(keyValuePairs["receiptData"].ToString());
+
+                if (!getCustomerInfo)
+                {
+                    JsonResult result = new JsonResult(new { result = "Failed", Message = "Failed getting value" });
                     return result;
                 }
-            }
 
-            bool receiptPrinted = true;
-            receiptPrinted = await PrintReceipt();
-            if (!receiptPrinted)
-            {
-                JsonResult notRegisteredResponse = new JsonResult(new { Message = "Error printing receipt" });
-                notRegisteredResponse.StatusCode = 500;
-                return notRegisteredResponse;
-            }
+                List<object> DataArray = new List<object>();
+
+                string data = Newtonsoft.Json.JsonConvert.SerializeObject(DataArray);
+
+                string transItems = Newtonsoft.Json.JsonConvert.SerializeObject(transactionItems);
+
+                double taxtotalValue = transactionItems.Where(a => a.itemType == 2).Sum(a => a.itemTaxAmount);
+                double subtotalValue = transactionItems.Where(a => a.itemType == 2 || a.itemType == 52).Sum(a => a.itemValue);
+
+                object PaymentData = new
+                {
+                    cashierID = cshrID,
+                    subAccID = "",
+                    accountID = "",
+                    posID = POSID,
+                    num = "",
+                    periodID = "",
+                    taxTotal = taxtotalValue,
+                    saleTotal = subtotalValue,
+                    isManual = "0",
+                    isZeroRated = "0",
+                    customerName = customerInfo.name ?? mopLastValues[3],
+                    address = customerInfo.add,
+                    TIN = customerInfo.TINNumber,
+                    businessStyle = customerInfo.busStyle,
+                    cardNumber = mopLastValues[2],
+                    approvalCode = mopLastValues[0],
+                    bankCode = mopLastValues[1],
+                    type = "1",
+                    itemsString = transItems,
+                    isRefund = "0",
+                    transaction_type = "1",
+                    isRefundOrigTransNum = "",
+                    transaction_resetter = "",
+                    birReceiptType = "2",
+                    birTransNum = "",
+                    poNum = "",
+                    plateNum = "",
+                    odometer = "",
+                    transRefund = "0",
+                    grossRefund = "0",
+                    subAccAmt = "",
+                    vehicleTypeID = vehicleType,
+                    isNormalTrans = "1",
+                    attendantID = "",
+                    items = transactionItems,
+                    scData = data,
+                    pwdData = data,
+                    spData = data,
+                    naacData = data,
+                    movData = data,
+                    serviceAmount = 0
+                };
 
 
-            JsonResult res = new JsonResult(new { result = "Success" });
-            return res;
-            
+
+
+                string doneSaving = "";
+
+                try
+                {
+                    doneSaving = await SendToAPI(PaymentData);
+                }
+                catch (Exception ex)
+                {
+                    var file = Assembly.GetExecutingAssembly().Location;
+                    Process.Start(file);
+                }
+
+                if (string.IsNullOrEmpty(doneSaving))
+                {
+
+                    JsonResult result = new JsonResult(new { result = "Failed", Message = doneSaving, task = "Send to api" });
+                    return result;
+
+                }
+
+                // done saving sample
+                // {"resetter":0,"or_num":17,"transID":"28"}
+
+                AddToTransResponse transNums = new AddToTransResponse();
+                transNums = JsonConvert.DeserializeObject<AddToTransResponse>(doneSaving);
+
+                string receiptOrNumber = transNums.or_num.ToString();
+                string receiptResetter = transNums.resetter.ToString();
+                string receiptTransID = transNums.transID.ToString();
+
+
+                bool receipt = true;
+                receipt = await createReceipt(transactionItems, receiptOrNumber, receiptResetter, receiptTransID, rptToPrint, receiptData);
+
+                if (!receipt)
+                {
+                    JsonResult result = new JsonResult(new { result = "Failed", Message = "Failed creating receipt" });
+                    return result;
+                }
+
+                bool XMLCreated = await CreateXML(receiptOrNumber, receiptResetter, taxtotalValue, subtotalValue, vehicleType, attendantID, pgCardNumber, PaymentData, cffls);
+
+                if (!XMLCreated)
+                {
+                    JsonResult notRegisteredResponse = new JsonResult(new { Message = "Error generating XML" });
+                    notRegisteredResponse.StatusCode = 500;
+                    return notRegisteredResponse;
+                }
+
+                // Clearing transactions
+                foreach (TransactionItemClass fuelItems in transactionItems.Where(a => a.itemType == 2))
+                {
+
+                    ClearTransaction((int)fuelItems.pumpID, fuelItems.deliveryID, out bool isCompleted, out string errorMessage);
+
+                    if (!isCompleted)
+                    {
+                        JsonResult result = new JsonResult(new { result = "Failed", Message = errorMessage });
+                        return result;
+                    }
+                }
+
+                bool receiptPrinted = true;
+                receiptPrinted = await PrintReceipt();
+                if (!receiptPrinted)
+                {
+                    JsonResult notRegisteredResponse = new JsonResult(new { Message = "Error printing receipt" });
+                    notRegisteredResponse.StatusCode = 500;
+                    return notRegisteredResponse;
+                }
+
+
+                JsonResult res = new JsonResult(new { result = "Success" });
+                return res;
+
             }
             catch (Exception e)
             {
@@ -1301,16 +1305,16 @@ namespace testASPWebAPI.Controllers
                 Transaction_ID = transactionNum,
                 si_number = siNum
             };
-            
+
             APIQuery(toEJournal, saveToJournalRoute);
 
-            if (!autoPrint)
+            /*if (!autoPrint)
             {
                 return true;
-            }
-            
+            }*/
+
             APIQuery(toPrintLog, saveToLogRoute);
-            
+
             try
             {
                 RequirementsFromAPI.TestPrint(receiptString);
@@ -1402,7 +1406,7 @@ namespace testASPWebAPI.Controllers
             return lRecLineChars;
         }
 
-        private async Task<bool> createReceipt(List<TransactionItemClass> items, string orNum, string orResetter, string transID, string rpttoprint)
+        private async Task<bool> createReceipt(List<TransactionItemClass> items, string orNum, string orResetter, string transID, string rpttoprint, ReceiptData receiptData)
         {
             receiptString = new List<string>();
 
@@ -1465,7 +1469,7 @@ namespace testASPWebAPI.Controllers
 
             siNum = FormatInvoiceNum(orNum.Trim(), orResetter.Trim());
             transactionNum = int.Parse(transID.Trim());
-            
+
 
             DateTime nowDate = DateTime.Now;                            //System date
             DateTimeFormatInfo dateFormat = new DateTimeFormatInfo();   //Date Format
@@ -1585,6 +1589,26 @@ namespace testASPWebAPI.Controllers
                 ReceiptSideString(f1WithoutLine, "");
             }
 
+            //=====================================================================================================
+            //                  RECEIPT DATA
+            receiptString.Add("");
+            ReceiptSideString("Merchant ID", receiptData.MerchantID);
+            ReceiptSideString("Terminal ID", receiptData.TerminalID);
+            ReceiptSideString("Payment Channel", receiptData.PaymentChannel);
+            ReceiptSideString("Card Type", receiptData.CardType);
+            ReceiptSideString("Card No", receiptData.CardNo);
+            ReceiptSideString("Transaction Type", receiptData.TransactionType);
+            ReceiptSideString("Batch No", receiptData.BatchNo);
+            ReceiptSideString("Trace No", receiptData.TraceNo);
+            ReceiptSideString("Reference No", receiptData.ReferenceNo);
+            ReceiptSideString("Transaction No", receiptData.TransactionNo);
+            ReceiptSideString("App Code", receiptData.AppCode);
+            ReceiptSideString("Date Time", strDate.Trim());
+            ReceiptSideString("Sale Amount", saleTotal.ToString("N2"));
+            ReceiptSideString("Currency", receiptData.Currency);
+            
+            //=====================================================================================================
+
             receiptString.Add("");
             foreach (string f1line in receiptHeaderFooter.footerL2.Split("\\n"))
             {
@@ -1692,7 +1716,7 @@ namespace testASPWebAPI.Controllers
             {
                 Transaction trs = getTransactionByID(int.Parse(delivery["pumpID"].ToString()), int.Parse(delivery["deliveryID"].ToString()));
 
-                if(trs == null)
+                if (trs == null)
                 {
                     return 0;
                 }
@@ -1761,7 +1785,7 @@ namespace testASPWebAPI.Controllers
                          }
                      }*/
 
-                    
+
 
 
                     DiscountPresets appliedDiscount = discountPresets.Where(a => a.presetId == discPresetID).First();
