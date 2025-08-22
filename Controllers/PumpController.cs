@@ -6,11 +6,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.PointOfService;
 using Newtonsoft.Json;
 using Registration;
+using RestSharp;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -28,6 +31,7 @@ using System.Xml;
 using System.Xml.Linq;
 using testASPWebAPI.Data;
 using static System.Net.WebRequestMethods;
+using static System.Windows.Forms.AxHost;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
 
 namespace testASPWebAPI.Controllers
@@ -991,7 +995,8 @@ namespace testASPWebAPI.Controllers
 
                 try
                 {
-                    doneSaving = await SendToAPI(PaymentData);
+                    doneSaving = await SendToAPI(cshrID, "", "", POSID, "","", taxtotalValue, subtotalValue, "0", "0", customerInfo.name ?? mopLastValues[3], customerInfo.add, customerInfo.TINNumber, customerInfo.busStyle, mopLastValues[2], mopLastValues[0], mopLastValues[1],
+                        "1", transItems, "0", "1", "", "", "2", "", "","","", "0","0","",vehicleType,"1","",transactionItems,data,data,data,data,data,0);
                 }
                 catch (Exception ex)
                 {
@@ -1019,7 +1024,7 @@ namespace testASPWebAPI.Controllers
 
 
                 bool receipt = true;
-                receipt = await createReceipt(transactionItems, receiptOrNumber, receiptResetter, receiptTransID, rptToPrint, receiptData);
+                receipt = await createReceipt(transactionItems, receiptOrNumber, receiptResetter, receiptTransID, rptToPrint);
 
                 if (!receipt)
                 {
@@ -1058,6 +1063,16 @@ namespace testASPWebAPI.Controllers
                     return notRegisteredResponse;
                 }
 
+                bool cfReceiptPrinter = true;
+                cfReceiptPrinter = await CreateAndPrintCFReceipt(receiptData, subtotalValue);
+
+                if (!cfReceiptPrinter)
+                {
+                    JsonResult notRegisteredResponse = new JsonResult(new { Message = "Error printing receipt" });
+                    notRegisteredResponse.StatusCode = 500;
+                    return notRegisteredResponse;
+                }
+
 
                 JsonResult res = new JsonResult(new { result = "Success" });
                 return res;
@@ -1071,6 +1086,48 @@ namespace testASPWebAPI.Controllers
             }
 
 
+        }
+
+        private async Task<bool> CreateAndPrintCFReceipt(ReceiptData receiptData, double saleTotal)
+        {
+            DateTime nowDate = DateTime.Now;                            //System date
+            DateTimeFormatInfo dateFormat = new DateTimeFormatInfo();   //Date Format
+            dateFormat.MonthDayPattern = "MM";
+            string strDate = nowDate.ToString("MM/dd/yyyy hh:mm tt", dateFormat);
+
+            try
+            {
+                receiptString.Clear();
+                //=====================================================================================================
+                //                  RECEIPT DATA
+                receiptString.Add("");
+                ReceiptSideString("Merchant ID", receiptData.MerchantID);
+                ReceiptSideString("Terminal ID", receiptData.TerminalID);
+                ReceiptSideString("Payment Channel", receiptData.PaymentChannel);
+                ReceiptSideString("Card Type", receiptData.CardType);
+                ReceiptSideString("Card No", receiptData.CardNo);
+                ReceiptSideString("Transaction Type", receiptData.TransactionType);
+                ReceiptSideString("Batch No", receiptData.BatchNo);
+                ReceiptSideString("Trace No", receiptData.TraceNo);
+                ReceiptSideString("Reference No", receiptData.ReferenceNo);
+                ReceiptSideString("Transaction No", receiptData.TransactionNo);
+                ReceiptSideString("App Code", receiptData.AppCode);
+                ReceiptSideString("Date Time", strDate.Trim());
+                ReceiptSideString("Sale Amount", saleTotal.ToString("N2"));
+                ReceiptSideString("Currency", receiptData.Currency);
+
+                //=====================================================================================================
+
+                RequirementsFromAPI.TestPrint(receiptString);
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+
+            return true;
+
+            
         }
 
         private async Task<bool> CreateXML(string orNum, string orResetter, double taxtotalValue, double subtotalValue, string vehicleType, string attendantID, string pgCardNumber, object paymentData, CFFLS cffls)
@@ -1406,7 +1463,7 @@ namespace testASPWebAPI.Controllers
             return lRecLineChars;
         }
 
-        private async Task<bool> createReceipt(List<TransactionItemClass> items, string orNum, string orResetter, string transID, string rpttoprint, ReceiptData receiptData)
+        private async Task<bool> createReceipt(List<TransactionItemClass> items, string orNum, string orResetter, string transID, string rpttoprint)
         {
             receiptString = new List<string>();
 
@@ -1501,7 +1558,7 @@ namespace testASPWebAPI.Controllers
                 if (item.itemType == 2)
                 {
                     ReceiptSideString($" {item.itemDesc.Trim()}", "");
-                    ReceiptThreeString($"  {item.itemQTY}L x P{item.itemPrice}", "VAT", $"P{item.itemValue.ToString("N2")}");
+                    ReceiptThreeString($"  {item.itemQTY}L x {item.itemPrice}", "VAT", $"P{item.itemValue.ToString("N2")}");
                 }
 
                 if (item.itemType == 52)
@@ -1523,6 +1580,8 @@ namespace testASPWebAPI.Controllers
                     continue;
 
                 ReceiptSideString(mop.itemDesc.Trim(), $"P{mop.itemValue.ToString("N2")}");
+
+                
 
             }
 
@@ -1589,25 +1648,6 @@ namespace testASPWebAPI.Controllers
                 ReceiptSideString(f1WithoutLine, "");
             }
 
-            //=====================================================================================================
-            //                  RECEIPT DATA
-            receiptString.Add("");
-            ReceiptSideString("Merchant ID", receiptData.MerchantID);
-            ReceiptSideString("Terminal ID", receiptData.TerminalID);
-            ReceiptSideString("Payment Channel", receiptData.PaymentChannel);
-            ReceiptSideString("Card Type", receiptData.CardType);
-            ReceiptSideString("Card No", receiptData.CardNo);
-            ReceiptSideString("Transaction Type", receiptData.TransactionType);
-            ReceiptSideString("Batch No", receiptData.BatchNo);
-            ReceiptSideString("Trace No", receiptData.TraceNo);
-            ReceiptSideString("Reference No", receiptData.ReferenceNo);
-            ReceiptSideString("Transaction No", receiptData.TransactionNo);
-            ReceiptSideString("App Code", receiptData.AppCode);
-            ReceiptSideString("Date Time", strDate.Trim());
-            ReceiptSideString("Sale Amount", saleTotal.ToString("N2"));
-            ReceiptSideString("Currency", receiptData.Currency);
-            
-            //=====================================================================================================
 
             receiptString.Add("");
             foreach (string f1line in receiptHeaderFooter.footerL2.Split("\\n"))
@@ -1621,11 +1661,11 @@ namespace testASPWebAPI.Controllers
                 ReceiptCenteredString(f1line.Trim().Replace("\\", ""));
             }
 
-            receiptString.Add("");
+           /* receiptString.Add("");
             foreach (string f1line in receiptHeaderFooter.footerL4.Split("\\n"))
             {
                 ReceiptCenteredString(f1line.Trim().Replace("\\", ""));
-            }
+            }*/
 
             receiptString.Add("");
             foreach (string f1line in receiptHeaderFooter.footerL5.Split("\\n"))
@@ -1641,7 +1681,6 @@ namespace testASPWebAPI.Controllers
                     ReceiptCenteredString(rptLine);
                 }
             }
-
 
             return true;
         }
@@ -2057,6 +2096,60 @@ namespace testASPWebAPI.Controllers
             return true;
         }
 
+        private static async Task<Dictionary<string, object>> AddNewTrans(string route, string cshrID, string subAcc, string accID, int POSID, string num, string prdID, double txTotal, double saleTot, string isManual, string isZeroRated, string customerName,
+            string add, string tin, string bussStyle, string cardNum, string appCode, string bankCode, string type, string itemsString, string isRefund, string transType, string isRefOrigTransNum, string transResetter,
+            string birReceiptType, string birTransNum, string poNum, string plateNum, string odometer, string transRefund, string grossRefund, string subAccAmt, string vehicleType, string isNormalTrans, string attendantID,
+            List<TransactionItemClass> transItems, string scdata, string pwddata, string spdata, string naacdata, string movdata, int serviceAmount)
+        {
+            var client = new RestClient(route);
+            var request = new RestRequest(Method.POST);
+            request.AddHeader("cache-control", "no-cache");
+            request.AddHeader("content-type", "application/x-www-form-urlencoded");
+            request.AddParameter("cashierID", cshrID);
+            request.AddParameter("subAccID", subAcc); //SubAccount ID
+            request.AddParameter("accountID", accID);
+            request.AddParameter("posID", POSID);
+            request.AddParameter("taxTotal", txTotal);
+            request.AddParameter("saleTotal", saleTot);
+            request.AddParameter("isManual", isManual);
+            request.AddParameter("isZeroRated", isZeroRated);
+            request.AddParameter("customerName", customerName);
+            request.AddParameter("address", add);
+            request.AddParameter("TIN", tin);
+            request.AddParameter("businessStyle", bussStyle);
+            request.AddParameter("cardNumber", cardNum);
+            request.AddParameter("approvalCode", appCode);
+            request.AddParameter("bankCode", bankCode);
+            request.AddParameter("type", type);
+            request.AddParameter("isRefund", isRefund);
+            request.AddParameter("transaction_type", transType);
+            request.AddParameter("isRefundOrigTransNum", isRefOrigTransNum);
+            request.AddParameter("transaction_resetter", transResetter);
+            request.AddParameter("birReceiptType", birReceiptType);
+            request.AddParameter("poNum", poNum);
+            request.AddParameter("plateNum", plateNum);
+            request.AddParameter("odometer", odometer);
+            request.AddParameter("transRefund", transRefund);
+            request.AddParameter("grossRefund", grossRefund);
+            request.AddParameter("subAccPmt", subAccAmt); // SubAccount Payment
+            request.AddParameter("vehicleTypeID", vehicleType);
+            request.AddParameter("isNormalTrans", transType);
+            request.AddParameter("items", itemsString);
+            request.AddParameter("scData", scdata);
+            request.AddParameter("pwdData", pwddata);
+            request.AddParameter("spData", spdata);
+            request.AddParameter("naacData", naacdata);
+            request.AddParameter("movData", movdata);
+            request.AddParameter("serviceAmount", serviceAmount);
+
+            IRestResponse response = client.Execute(request);
+
+            RestSharp.Deserializers.JsonDeserializer deserializer = new RestSharp.Deserializers.JsonDeserializer();
+            Dictionary<string, object> responseValue = new Dictionary<string, object>();
+            responseValue = deserializer.Deserialize<Dictionary<string, object>>(response);
+            return responseValue;
+        }
+
         private async Task<Dictionary<string, object>> APIQuery(object obj, string route)
         {
             HttpClient http = new HttpClient();
@@ -2085,8 +2178,14 @@ namespace testASPWebAPI.Controllers
 
         }
 
-        private async Task<string> SendToAPI(object obj)
+        private async Task<string> SendToAPI(string cshrID, string subAcc, string accID, int POSID, string num, string prdID, double txTotal, double saleTot, string isManual, string isZeroRated, string customerName,
+            string add, string tin, string bussStyle, string cardNum, string appCode, string bankCode, string type, string itemsString, string isRefund, string transType, string isRefOrigTransNum, string transResetter,
+            string birReceiptType, string birTransNum, string poNum, string plateNum, string odometer, string transRefund, string grossRefund, string subAccAmt, string vehicleType, string isNormalTrans, string attendantID,
+            List<TransactionItemClass> transItems, string scdata, string pwddata, string spdata, string naacdata, string movdata, int serviceAmount)
         {
+
+    
+
             //JsonElement response = new JsonElement();
             string response = "";
             try
@@ -2094,7 +2193,15 @@ namespace testASPWebAPI.Controllers
                 //JsonDocument decodedResponse = await APIQuery(obj, addNewTransactionRoute);
                 //JsonElement responseValue = decodedResponse.RootElement.GetProperty("data");
                 Dictionary<string, object> decodedResponse = new Dictionary<string, object>();
-                decodedResponse = await APIQuery(obj, addNewTransactionRoute);
+                //decodedResponse = await APIQuery(obj, addNewTransactionRoute);
+
+                //============================================================================
+                // new db
+                
+                decodedResponse = await AddNewTrans(addNewTransactionRoute,  cshrID,  subAcc,  accID, POSID,  num,  prdID, txTotal, saleTot,  isManual,  isZeroRated,  customerName,
+             add,  tin,  bussStyle,  cardNum,  appCode,  bankCode,  type,  itemsString,  isRefund,  transType,  isRefOrigTransNum,  transResetter,
+             birReceiptType,  birTransNum,  poNum,  plateNum,  odometer,  transRefund,  grossRefund,  subAccAmt,  vehicleType,  isNormalTrans,  attendantID,
+            transItems,  scdata,  pwddata,  spdata,  naacdata,  movdata, serviceAmount);
                 Console.WriteLine($"send to api status code is {decodedResponse["statusCode"]}");
                 Console.WriteLine($"send to api status code is {decodedResponse["statusDescription"]}");
                 //string responseValue = decodedResponse["data"].ToString();

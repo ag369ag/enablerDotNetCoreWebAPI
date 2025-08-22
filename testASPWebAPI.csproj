@@ -35,6 +35,9 @@
       <HintPath>lib\Registration.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="RestSharp">
+      <HintPath>lib\RestSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System.Windows.Forms">
       <HintPath>lib\System.Windows.Forms.dll</HintPath>
       <Private>True</Private>
@@ -64,6 +67,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="lib\Registration.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="lib\RestSharp.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="lib\System.Windows.Forms.dll">
